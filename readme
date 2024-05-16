@@ -11,4 +11,27 @@ ansible-config init --disabled > ansible.cfg
 [servers]
 salaserver ansible_host=192.168.0.201 
 
+#get IP of domain
+Open the terminal app or log in using ssh to host server.
+Get the network list: 	virsh net-list
+Type the command: 		virsh net-dhcp-leases networkNameHere
 
+#drop and delete existing domain
+virsh undefine k8smaster --remove-all-storage
+
+#run VM domain
+virt-install -n k8smaster \
+--description "Control plane K8s" \
+--osinfo=ubuntu24.04 \
+--os-variant=ubuntu24.04 \
+--memory=8192 -\
+-vcpus=2 \
+--disk path=/srv/data/img/ubuntu-01.img \
+--network network=bridged-network \
+--import \
+--virt-type kvm \
+--graphics none \
+--wait 0
+
+#connect to vm console
+virsh --connect qemu:///system console k8smaster
