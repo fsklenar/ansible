@@ -1,0 +1,92 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - vars/common_vars.yaml
+
+  tasks:
+    - name: Update apt and install required KVM packages
+      apt:
+        pkg:
+          - qemu-kvm 
+          - virtinst 
+          - libvirt-clients 
+          - bridge-utils 
+          - libvirt-daemon-system
+        state: latest
+        update_cache: true
+
+    - name: create /srv/data folder
+      file:
+        path: /srv/data
+        state: directory
+        mode: '0750'
+        owner: "{{ server_username }}"
+        group: "{{ ansible_username }}"
+
+    - name: create /srv/data/iso folder
+      file:
+        path: /srv/data/iso
+        state: directory
+        mode: '0770'
+        owner: "{{ server_username }}"
+        group: "{{ ansible_username }}"
+
+    - name: create /srv/data/img folder
+      file:
+        path: /srv/data/img
+        state: directory
+        mode: '0770'
+        owner: "{{ server_username }}"
+        group: "{{ ansible_username }}"
+
+    - name: check if img file exists
+      stat:
+        path: "/srv/data/iso/{{ ubuntu_img_file }}"
+      register: ubuntu_file_status
+
+    - name: download ubuntu image (if not exists)
+      get_url:
+        url: "{{ ubuntu_img_url }}"
+        dest: /srv/data/iso
+        mode: '0750'
+        group: "{{ server_username }}"
+        owner: "{{ server_username }}"
+      when: not ubuntu_file_status.stat.exists
+
+    - name: check if qcow2 file exists
+      stat:
+        path: "/srv/data/img/{{ ubuntu_img_file }}.qcow2"
+      register: qcow2_file_status
+      
+    - name: convert img to qcow2
+      shell: |
+        qemu-img convert -f raw -O qcow2 "/srv/data/iso/{{ ubuntu_img_file }}" "/srv/data/img/{{ ubuntu_img_file }}.qcow2"
+        chown "{{ server_username }}":"{{ server_username }}" "/srv/data/img/{{ ubuntu_img_file }}.qcow2"
+        chmod 0750 "/srv/data/img/{{ ubuntu_img_file }}.qcow2"
+      when: not qcow2_file_status.stat.exists
+
+    - name: check if netplan bridge file exists
+      stat:
+        path: "/etc/netplan/01-bridge.yaml"
+      register: bridge_file_status
+
+    - name: create bridge network
+      copy:
+        src: vars/01-bridge.yaml
+        dest: /etc/netplan/
+        mode: '0600'
+        group: root
+        owner: root 
+      when: not bridge_file_status.stat.exists
+
+    - name: check if netplan bridge file exists v2
+      stat:
+        path: "/etc/netplan/01-bridge.yaml"
+      register: bridge_file_status
+      
+    - name: delete common network yaml file
+      file:
+        path: /etc/netplan/50-cloud-init.yaml
+        state: absent 
+      when: bridge_file_status.stat.exists

@@ -1,0 +1,14 @@
+#installation
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+#generate default config /etc/ansible/ansible.cfg
+ansible-config init --disabled > ansible.cfg
+
+#add ansible hosts file /etc/ansible/hosts
+[servers]
+salaserver ansible_host=192.168.0.201 
+
+
