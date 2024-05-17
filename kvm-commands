@@ -1,22 +1,11 @@
-#installation
-sudo apt update
-sudo apt install software-properties-common
-sudo add-apt-repository --yes --update ppa:ansible/ansible
-sudo apt install ansible
-
-#generate default config /etc/ansible/ansible.cfg
-ansible-config init --disabled > ansible.cfg
-
-#add ansible hosts file /etc/ansible/hosts
-[servers]
-salaserver ansible_host=192.168.0.201 
-
+##Common KVM commands, tips & tricks
 #get IP of domain
 Open the terminal app or log in using ssh to host server.
 Get the network list: 	virsh net-list
-Type the command: 		virsh net-dhcp-leases networkNameHere
+Type the command: 	    virsh net-dhcp-leases networkNameHere
 
-#drop and delete existing domain
+
+#delete existing domain including deleting of storage 
 virsh undefine k8smaster --remove-all-storage
 
 #run VM domain
@@ -24,8 +13,8 @@ virt-install -n k8smaster \
 --description "Control plane K8s" \
 --osinfo=ubuntu24.04 \
 --os-variant=ubuntu24.04 \
---memory=8192 -\
--vcpus=2 \
+--memory=8192 \
+--vcpus=2 \
 --disk path=/srv/data/img/ubuntu-01.img \
 --network network=bridged-network \
 --import \
