@@ -79,7 +79,7 @@
       
     - name: copy bridger xml file
       copy: 
-        src: vars/02-bridger-network.yaml 
+        src: vars/02-kvm-bridger-network.yaml 
         dest: /tmp/
         mode: '0600'
         group: root
@@ -87,7 +87,7 @@
       
     - name: create bridger network for KVM
       shell: |
-        sudo virsh net-define /tmp/02-bridger-network.yaml
+        sudo virsh net-define /tmp/02-kvm-bridger-network.yaml
         sudo virsh net-start bridged-network
         sudo virsh net-autostart bridged-network 
       
