@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: salaserver
   become: true
   vars:
     my_pass: "{{ lookup('password', '/tmp/passwordfile length=15 chars=ascii_letters') }}"

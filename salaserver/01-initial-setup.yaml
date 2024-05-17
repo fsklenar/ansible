@@ -5,6 +5,11 @@
     - vars/common_vars.yaml
 
   tasks:
+  
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: dist
+  
     - name: Install aptitude
       apt:
         name: aptitude
@@ -19,7 +24,15 @@
         append: true
         create_home: true
 
-    - name: Setup passwordless sudo for Ansible user
+    - name: Create a new regular user with sudo privileges for "{{ server_username }}" 
+      user:
+        name: "{{ server_username }}"
+        state: present
+        groups: sudo
+        append: true
+        create_home: true
+
+    - name: Setup passwordless sudo for Ansible 
       lineinfile:
         path: /etc/sudoers
         state: present
@@ -33,10 +46,20 @@
         state: present
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
         line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
+        
+    - name: Set timezone to Europe
+      community.general.timezone:
+        name: Europe/Bratislava
 
     - name: Set authorized key for remote user
       ansible.posix.authorized_key:
         user: "{{ server_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    - name: Set authorized key for ansible user
+      ansible.posix.authorized_key:
+        user: "{{ ansible_username }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
@@ -58,12 +81,12 @@
         state: latest
         update_cache: true
 
-    - name: UFW - Allow SSH connections
-      community.general.ufw:
-        rule: allow
-        name: OpenSSH
+    #- name: UFW - Allow SSH connections
+      #community.general.ufw:
+        #rule: allow
+        #name: OpenSSH
 
-    - name: UFW - Enable and deny by default
-      community.general.ufw:
-        state: enabled
-        default: deny
+    #- name: UFW - Enable and deny by default
+      #community.general.ufw:
+        #state: enabled
+        #default: deny

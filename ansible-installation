@@ -12,6 +12,26 @@ sudo apt install ansible-core
 #generate default config /etc/ansible/ansible.cfg
 ansible-config init --disabled > ansible.cfg
 
+#set ansible as remote user in ansible.cfg file
+remote_user=ansible
+
 #add ansible hosts file /etc/ansible/hosts
 [servers]
-salaserver ansible_host=192.168.0.201 
+salaserver ansible_host=192.168.0.201
+
+[vms]
+k8smaster ansible_host=192.168.0.202
+k8sworker01 ansible_host=192.168.0.203
+k8sworker01 ansible_host=192.168.0.204
+
+#run first time 01-initial-setup playbook under default installed sudoer user with password
+ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
+
+#next run can be executed without user 
+ansible-playbook 01-initial-setup.yaml
+ansible-playbook 02-docker.yaml
+ansible-playbook 03-kvm.yaml
+ansible-playbook 04-ubuntu-vm-preparation.yaml
+
+#run first playbook towards vms
+ansible-playbook 01-initial-setup.yaml -u root -l k8smaster
