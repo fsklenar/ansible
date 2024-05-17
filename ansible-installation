@@ -1,17 +1,17 @@
-## Commands to execute on host + local
+###Commands to execute on host + local
 sudo apt update
 sudo apt install software-properties-common
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 
-## Host (Linux server)
+###Host (Linux server)
 sudo apt install ansible
 
-## Local machine only
+###Local machine only
 sudo apt install ansible-core
 
-### generate default config /etc/ansible/ansible.cfg
+#generate default config /etc/ansible/ansible.cfg
 ansible-config init --disabled > ansible.cfg
 
-### add ansible hosts file /etc/ansible/hosts
+#add ansible hosts file /etc/ansible/hosts
 [servers]
 salaserver ansible_host=192.168.0.201 
