@@ -16,13 +16,14 @@
         state: latest
         update_cache: true
         
-    - name: Create a new regular user with sudo privileges for Ansible
+    - name: Create a new regular user with sudo privileges for "{{ ansible_username }}"
       user:
         name: "{{ ansible_username }}"
         state: present
         groups: sudo
         append: true
         create_home: true
+        shell: /bin/bash
 
     - name: Create a new regular user with sudo privileges for "{{ server_username }}" 
       user:
@@ -31,13 +32,22 @@
         groups: sudo
         append: true
         create_home: true
+        shell: /bin/bash
 
-    - name: Setup passwordless sudo for Ansible 
+    - name: Setup passwordless sudo for "{{ ansible_username }}"
       lineinfile:
         path: /etc/sudoers
         state: present
-        regexp: '^ansible'
-        line: 'ansible ALL=(ALL) NOPASSWD: ALL'
+        regexp: '^{{ ansible_username }}'
+        line: '{{ ansible_username }} ALL=(ALL) NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+
+    - name: Setup passwordless sudo for {{ server_username }}
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^{{ server_username }}'
+        line: '{{ server_username }} ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
         
     - name: Mitigations off
