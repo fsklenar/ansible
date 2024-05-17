@@ -12,6 +12,13 @@
       stat:
         path: "/srv/data/img/ubuntu-01.img"
       register: ubuntu_file_status
+      
+    - name: Mitigations off
+      lineinfile:
+        path: /etc/default/grub
+        state: present
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
           
     - block: 
 
@@ -22,6 +29,14 @@
           mode: '0750'
           owner: "libvirt-qemu"
           group: "{{ server_username }}"
+
+      - name: copy netplan network file with static IP
+        copy: 
+          src: vm/01-netplan-network.yaml 
+          dest: /tmp/01-netplan-network.yaml
+          mode: '0600'
+          group: root
+          owner: root
            
       - set_fact:
           root_pass: "{{ my_pass }}"
@@ -33,15 +48,7 @@
       - name: write random password to tempfile
         copy: content="{{ root_pass }}" dest=/tmp/passwordfile
         
-      - name: copy netplan network file with static IP
-        copy: 
-          src: vm/01-netplan-network.yaml 
-          dest: /tmp/01-netplan-network.yaml
-          mode: '0600'
-          group: root
-          owner: root
-        
-      - name: set random root password to image
+      - name: set random root password to image, netplan network configuration 
         shell: |
            randpass=`cat /tmp/passwordfile`
            sudo virt-customize -a "/srv/data/img/ubuntu-01.img" --root-password password:$randpass --upload /tmp/01-netplan-network.yaml:/etc/netplan/01-netplan-network.yaml
