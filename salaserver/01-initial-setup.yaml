@@ -88,8 +88,10 @@
           - git
           - ufw
           - cpu-checker
+          - gh
         state: latest
         update_cache: true
+      when: "'servers' in group_names"
 
     #- name: UFW - Allow SSH connections
       #community.general.ufw:
