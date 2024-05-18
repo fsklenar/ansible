@@ -25,8 +25,8 @@
 
       - name: copy netplan network file with static IP
         copy: 
-          src: vm/01-netplan-network.yaml 
-          dest: /tmp/01-netplan-network.yaml
+          src: vm/01-vm-netplan-network.yaml 
+          dest: /tmp/01-vm-netplan-network.yaml
           mode: '0600'
           group: root
           owner: root
@@ -54,7 +54,7 @@
            randpass=`cat /tmp/passwordfile`
            sudo qemu-img resize "/srv/data/img/ubuntu-01.img" +20G
            sudo virt-customize -a "/srv/data/img/ubuntu-01.img" --root-password password:$randpass \
-             --upload /tmp/01-netplan-network.yaml:/etc/netplan/01-netplan-network.yaml \
+             --upload /tmp/01-vm-netplan-network.yaml:/etc/netplan/01-vm-netplan-network.yaml \
              --ssh-inject root:file:/tmp/id_rsa.pub \
              --timezone "Europe/Bratislava" \
              --uninstall openssh-server \

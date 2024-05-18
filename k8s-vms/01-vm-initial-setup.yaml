@@ -1,0 +1,26 @@
+---
+- hosts: vms
+  become: true
+#  vars_files:
+#    - vars/common_vars.yaml
+
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - munin-node
+        state: latest
+        update_cache: true
+
+    - name: Allow cidr to Munin
+      lineinfile:
+        path: /etc/munin/munin-node.conf
+        state: present
+        regexp: '^cidr_allow 192.168.0.0/24'
+        line: 'cidr_allow 192.168.0.0/24'
+
+
+
+        
+
