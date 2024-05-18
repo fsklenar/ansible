@@ -1,8 +1,8 @@
 ---
 - hosts: vms
   become: true
-#  vars_files:
-#    - vars/common_vars.yaml
+  vars_files:
+    - vars/common_vars.yaml
 
   tasks:
 
@@ -23,6 +23,37 @@
         regexp: '^cidr_allow 192.168.0.0/24'
         line: 'cidr_allow 192.168.0.0/24'
 
+    - name: Keyrings rights, install cert
+      shell: |
+        sudo mkdir -p -m 755 /etc/apt/keyrings
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/Release.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+        sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
+
+    - name: Install kubectl, kubeadm, kubelet
+      apt:
+        pkg:
+          - kubectl
+          - kubeadm
+          - kubelet
+        state: latest
+        update_cache: true
+
+    - name: Hold kubeadm
+      dpkg_selections:
+        name: kubeadm
+        selection: hold
+
+    - name: Hold kubelet
+      dpkg_selections:
+        name: kubelet
+        selection: hold
+
+    - name: Hold kubectl
+      dpkg_selections:
+        name: kubectl
+        selection: hold
 
 
         
