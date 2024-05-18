@@ -46,3 +46,28 @@
       with_items:
         - "{{ server_username }}"
         - "{{ ansible_username }}"
+   
+    - block:      
+   
+        - name: Clone docker repo from github
+          git:
+            repo: 'https://github.com/fsklenar/docker.git'
+            dest: /srv/data/docker
+            clone: yes
+            update: no
+
+        - name: Set owner to repo
+          ansible.builtin.file:
+            path: /srv/data/docker
+            owner: "{{ server_username }}"
+            group: "{{ server_username }}"
+            recurse: true
+            mode: o-rwx
+            
+        - name: Run all docker containers after "@reboot"
+          cron:
+            name: "Run all dockers after reboot"
+            special_time: reboot
+            job: "/srv/data/docker/runall.sh"
+
+      when: "'servers' in group_names"

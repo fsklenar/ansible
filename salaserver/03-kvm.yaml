@@ -27,6 +27,7 @@
         owner: "{{ server_username }}"
         group: "libvirt-qemu"
 
+
     - name: create /srv/data/iso folder
       file:
         path: /srv/data/iso
