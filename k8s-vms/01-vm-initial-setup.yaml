@@ -10,6 +10,9 @@
       apt:
         pkg:
           - munin-node
+          - apt-transport-https
+          - ca-certificates
+          - curl
         state: latest
         update_cache: true
 

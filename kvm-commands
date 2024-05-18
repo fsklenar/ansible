@@ -1,9 +1,4 @@
 ###Common KVM commands, tips & tricks
-#get IP of domain
-Open the terminal app or log in using ssh to host server.
-Get the network list: 	virsh net-list
-Type the command: 	    virsh net-dhcp-leases networkNameHere
-
 
 #delete existing domain including deleting of storage 
 virsh undefine k8smaster --remove-all-storage
