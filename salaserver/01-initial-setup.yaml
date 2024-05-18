@@ -80,6 +80,20 @@
         regexp: '^#?PermitRootLogin'
         line: 'PermitRootLogin prohibit-password'
 
+    - name: SSH client KeepAlive interval
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        state: present
+        regexp: '^ServerAliveInterval 120'
+        line: 'ServerAliveInterval 120'
+
+    - name: SSH client KeepAlive interval part 2
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        state: present
+        regexp: '^ServerAliveCountMax 2'
+        line: 'ServerAliveCountMax 2'
+ 
     - name: Update apt and install required system packages
       apt:
         pkg:
@@ -92,6 +106,8 @@
         state: latest
         update_cache: true
       when: "'servers' in group_names"
+      
+ 
 
     #- name: UFW - Allow SSH connections
       #community.general.ufw:

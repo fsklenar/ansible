@@ -19,6 +19,12 @@ remote_user=ansible
 [servers]
 salaserver ansible_host=192.168.0.201
 
+#add public key ti linuxadmin.sk servers
+sudo -i  #switch to root
+ssh-keygen  #generate private/public key
+ssh-copy-id ubuntu@linuxadmin.sk
+
+
 [vms]
 k8smaster ansible_host=192.168.0.202
 k8sworker01 ansible_host=192.168.0.203
