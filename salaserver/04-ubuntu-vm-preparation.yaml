@@ -61,7 +61,7 @@
              --firstboot-install openssh-server \
              --firstboot-command "growpart /dev/vda 1" \
              --firstboot-command "resize2fs /dev/vda1" \
-             --hostnmae k8smaster
+             --hostname k8smaster
            rm /tmp/passwordfile
 
       when: not ubuntu_file_status.stat.exists

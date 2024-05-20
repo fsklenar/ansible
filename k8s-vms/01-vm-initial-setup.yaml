@@ -23,12 +23,12 @@
         regexp: '^cidr_allow 192.168.0.0/24'
         line: 'cidr_allow 192.168.0.0/24'
 
-    - name: Add cluster-endpoint to /etc/hosts
-      lineinfile:
-        path: /etc/hosts
-        state: present
-        regexp: '^192.168.0.202 cluster-endpoint'
-        line: '192.168.0.202 cluster-endpoint'
+    # - name: Add cluster-endpoint to /etc/hosts
+    #   lineinfile:
+    #     path: /etc/hosts
+    #     state: present
+    #     regexp: '^192.168.0.202 cluster-endpoint'
+    #     line: '192.168.0.202 cluster-endpoint'
 
 
     - name: Add hostname to /etc/hosts
@@ -38,12 +38,33 @@
         regexp: '^k8smaster'
         line: '192.168.0.202 k8smaster'
 
-    - name: CRI configuration
+    - name: Set up the IPV4 bridge - overlay
       lineinfile:
-        path: /etc/containerd/config.toml
+        path: /etc/modules-load.d/k8s.conf
         state: present
-        regexp: '^disabled_plugins'
-        line: '#disabled_plugins = ["cri"]'
+        regexp: '^overlay'
+        line: 'overlay'
+        create: true
+
+    - name: Set up the IPV4 bridge - br_netfilter
+      lineinfile:
+        path: /etc/modules-load.d/k8s.conf
+        state: present
+        regexp: '^br_netfilter'
+        line: 'br_netfilter'
+        create: true
+
+    - name: Set some kernel parameters
+      lineinfile:
+        create: true
+        dest: /etc/sysctl.conf
+        #dest: /etc/sysctl.d/k8s.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^net.bridge.bridge-nf-call-iptables', line: 'net.bridge.bridge-nf-call-iptables = 1' }
+        - { regexp: '^net.bridge.bridge-nf-call-ip6tables', line: 'net.bridge.bridge-nf-call-ip6tables = 1' }
+        - { regexp: '^net.ipv4.ip_forward', line: 'net.ipv4.ip_forward = 1' }
 
     - name: Keyrings rights, install cert
       shell: |
@@ -81,12 +102,22 @@
       shell: |
         cd /tmp
         wget https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64
-        install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
+        install -m 755 /tmp/runc.amd64 /usr/bin/runc
 
-#    - name: CNI plugins
-#      shell: |
-#        cd /tmp
-#        wget https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz
-#        mkdir -p /opt/cni/bin
-#        tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-{{ cni_version }}.tgz
+    - name: CNI plugins
+      shell: |
+        cd /tmp
+        wget https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz
+        mkdir -p /opt/cni/bin
+        tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-{{ cni_version }}.tgz
 
+    - name: Containerd - create default configuration
+      shell: |
+        containerd config default > /etc/containerd/config.toml
+
+    - name: CRI configuration
+      lineinfile:
+        path: /etc/containerd/config.toml
+        state: present
+        regexp: '^            SystemdCgroup = false'
+        line: '            SystemdCgroup = true'

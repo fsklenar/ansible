@@ -18,18 +18,15 @@ remote_user=ansible
 #add ansible hosts file /etc/ansible/hosts
 [servers]
 salaserver ansible_host=192.168.0.201
-
 [vms]
 k8smaster ansible_host=192.168.0.202
 k8sworker01 ansible_host=192.168.0.203
 k8sworker01 ansible_host=192.168.0.204
 
-
 #add root's public key to public accessible server (example.com) - used for port-forwarding
 sudo -i  #switch to root
 ssh-keygen  #generate private/public key
 ssh-copy-id ubuntu@example.com
-
 
 #run first time 01-initial-setup playbook under default installed sudoer user with password
 ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
@@ -40,8 +37,21 @@ ansible-playbook salaserver/02-docker.yaml
 ansible-playbook salaserver/03-kvm.yaml
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml
 
+
 ##configuration of VMs
+#start VM
+virsh start <domain>
+
 #run first playbook towards vms
 ansible-playbook salaserver/01-initial-setup.yaml -u root -l k8smaster
+ansible-playbook salaserver/02-docker.yaml
 
+#finish k8s preparation
+ansible-playbook k8s-vms/01-vm-initial-setup.yaml
+
+#reboot VM
+virsh reboot <domain>
+
+#install Kubernetes ->
+- read kubernetes-installation file
 
