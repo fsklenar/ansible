@@ -1,4 +1,5 @@
 ---
+#https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 - hosts: vms
   become: true
   vars_files:
@@ -8,4 +9,5 @@
   tasks:
 
     - name: Create k8s cluster
-
+      shell: |
+        kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-address 192.168.0.202

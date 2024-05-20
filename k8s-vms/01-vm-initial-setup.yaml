@@ -23,6 +23,28 @@
         regexp: '^cidr_allow 192.168.0.0/24'
         line: 'cidr_allow 192.168.0.0/24'
 
+    - name: Add cluster-endpoint to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^192.168.0.202 cluster-endpoint'
+        line: '192.168.0.202 cluster-endpoint'
+
+
+    - name: Add hostname to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^k8smaster'
+        line: '192.168.0.202 k8smaster'
+
+    - name: CRI configuration
+      lineinfile:
+        path: /etc/containerd/config.toml
+        state: present
+        regexp: '^disabled_plugins'
+        line: '#disabled_plugins = ["cri"]'
+
     - name: Keyrings rights, install cert
       shell: |
         sudo mkdir -p -m 755 /etc/apt/keyrings
@@ -55,6 +77,16 @@
         name: kubectl
         selection: hold
 
+    - name: RUNC installation
+      shell: |
+        cd /tmp
+        wget https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64
+        install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
 
-        
+#    - name: CNI plugins
+#      shell: |
+#        cd /tmp
+#        wget https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz
+#        mkdir -p /opt/cni/bin
+#        tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-{{ cni_version }}.tgz
 

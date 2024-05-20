@@ -1,2 +1,4 @@
 ---
-kubectl_ver: "v1.30"
+kubectl_ver: "v1.29"
+runc_version: v1.1.12
+cni_version: v1.4.1
