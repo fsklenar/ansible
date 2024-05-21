@@ -4,13 +4,13 @@
   vars:
     my_pass: "{{ lookup('password', '/tmp/passwordfile length=15 chars=ascii_letters') }}"
   vars_files:
-    - vars/common_vars.yaml
+    - ../vars/common_vars.yaml
 
   tasks:    
   
     - name: check if img file exists
       stat:
-        path: "/srv/data/img/ubuntu-01.img"
+        path: "/srv/data/img/{{ vm_img_name }}"
       register: ubuntu_file_status
       
     - block: 
@@ -18,7 +18,7 @@
       - name: download ubuntu image, if not exists
         get_url:
           url: "{{ ubuntu_img_url }}"
-          dest: /srv/data/img/ubuntu-01.img
+          dest: /srv/data/img/{{ vm_img_name }}
           mode: '0750'
           owner: "libvirt-qemu"
           group: "{{ server_username }}"
@@ -30,6 +30,9 @@
           mode: '0600'
           group: root
           owner: root
+
+      - name: Set coorect IP to netplan network
+      !!!!!
 
       - name: copy ssh public key
         copy: 
@@ -52,8 +55,8 @@
       - name: set random root password to image, netplan network configuration 
         shell: |
            randpass=`cat /tmp/passwordfile`
-           sudo qemu-img resize "/srv/data/img/ubuntu-01.img" +20G
-           sudo virt-customize -a "/srv/data/img/ubuntu-01.img" --root-password password:$randpass \
+           sudo qemu-img resize "/srv/data/img/{{ vm_img_name }}" +20G
+           sudo virt-customize -a "/srv/data/img/{{ vm_img_name }}" --root-password password:$randpass \
              --upload /tmp/01-vm-netplan-network.yaml:/etc/netplan/01-vm-netplan-network.yaml \
              --ssh-inject root:file:/tmp/id_rsa.pub \
              --timezone "Europe/Bratislava" \
@@ -61,7 +64,7 @@
              --firstboot-install openssh-server \
              --firstboot-command "growpart /dev/vda 1" \
              --firstboot-command "resize2fs /dev/vda1" \
-             --hostname k8smaster
+             --hostname {{ controlplane_hostname }}
            rm /tmp/passwordfile
 
       when: not ubuntu_file_status.stat.exists

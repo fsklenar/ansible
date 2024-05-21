@@ -1,0 +1,2 @@
+vm_img_name: ubuntu-01.img
+vm_ip: {{ controlplane_ip }}

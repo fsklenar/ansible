@@ -4,7 +4,7 @@
   vars:
     my_pass: "{{ lookup('password', '/tmp/passwordfile length=15 chars=ascii_letters') }}"
   vars_files:
-    - vars/common_vars.yaml
+    - ../vars/common_vars.yaml
 
   tasks:
     - name: Update apt and install required KVM packages

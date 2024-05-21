@@ -2,7 +2,7 @@
 - hosts: vms
   become: true
   vars_files:
-    - vars/common_vars.yaml
+    - ../vars/common_vars.yaml
 
   tasks:
 
@@ -35,8 +35,22 @@
       lineinfile:
         path: /etc/hosts
         state: present
-        regexp: '^k8smaster'
-        line: '192.168.0.202 k8smaster'
+        regexp: '^{{ controlplane_hostname }}'
+        line: '{{ controlplane_ip }} {{ controlplane_hostname }}'
+
+    - name: Add hostname to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^{{ worker01_hostname }}'
+        line: '{{ worker01_ip }} {{ worker01_hostname }}'
+
+    - name: Add hostname to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^{{ worker02_hostname }}'
+        line: '{{ worker02_ip }} {{ worker02_hostname }}'
 
     - name: Set up the IPV4 bridge - overlay
       lineinfile:
