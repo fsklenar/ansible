@@ -1,7 +1,9 @@
 ##  Commands to execute on host(server) + local(PC)
+---
 sudo apt update
 sudo apt install software-properties-common
 sudo add-apt-repository --yes --update ppa:ansible/ansible
+---
 
 ## Host (Linux server)
 sudo apt install ansible
