@@ -1,9 +1,12 @@
 # Common KVM commands, tips & tricks
 
 ### delete existing domain including deleting of storage 
+```
 virsh undefine k8smaster --remove-all-storage
+```
 
 ### run VM domain
+```
 virt-install -n k8smaster \
 --description "Control plane K8s" \
 --osinfo=ubuntu24.04 \
@@ -42,9 +45,14 @@ virt-install -n k8sworker02 \
 --virt-type kvm \
 --graphics none \
 --wait 0
+```
 
 ### connect to vm console
+```
 virsh --connect qemu:///system console <domain>
+```
 
 ### autostart of domain
+```
 virsh autostart <domain>
+```
