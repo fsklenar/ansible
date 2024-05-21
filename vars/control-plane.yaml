@@ -1,2 +1,4 @@
+---
 vm_img_name: ubuntu-01.img
-vm_ip: {{ controlplane_ip }}
+vm_ip: 192.168.0.202
+vm_hostname: k8smaster

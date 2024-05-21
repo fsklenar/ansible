@@ -13,7 +13,7 @@
         path: "/srv/data/img/{{ vm_img_name }}"
       register: ubuntu_file_status
       
-    - block: 
+    - block:
 
       - name: download ubuntu image, if not exists
         get_url:
@@ -32,7 +32,11 @@
           owner: root
 
       - name: Set coorect IP to netplan network
-      !!!!!
+        lineinfile:
+          path: /tmp/01-vm-netplan-network.yaml
+          state: present
+          regexp: '^                - <vm-ip>/24'
+          line: '                - {{ vm_ip }}/24'
 
       - name: copy ssh public key
         copy: 
@@ -64,7 +68,7 @@
              --firstboot-install openssh-server \
              --firstboot-command "growpart /dev/vda 1" \
              --firstboot-command "resize2fs /dev/vda1" \
-             --hostname {{ controlplane_hostname }}
+             --hostname "{{ vm_hostname }}"
            rm /tmp/passwordfile
 
       when: not ubuntu_file_status.stat.exists

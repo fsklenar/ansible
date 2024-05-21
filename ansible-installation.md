@@ -36,11 +36,11 @@ ansible-playbook salaserver/01-initial-setup.yaml
 ansible-playbook salaserver/02-docker.yaml
 ansible-playbook salaserver/03-kvm.yaml
 
-ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@../var/control-plane.yaml"
+ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/control-plane.yaml"
 --or--
-ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@../var/worker01.yaml"
+ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker01.yaml"
 --or--
-ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@../var/worker02.yaml"
+ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker02.yaml"
 
 
 ## configuration of VMs
@@ -48,8 +48,8 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@../var/
 virsh start <domain>
 
 ### run first playbook towards vms
-ansible-playbook salaserver/01-initial-setup.yaml -u root -l k8smaster
-ansible-playbook salaserver/02-docker.yaml -l k8smaster
+ansible-playbook salaserver/01-initial-setup.yaml -u root -l <server_name>
+ansible-playbook salaserver/02-docker.yaml -l <server_name>
 
 ### finish k8s preparation
 ansible-playbook k8s-vms/01-vm-initial-setup.yaml
@@ -57,6 +57,6 @@ ansible-playbook k8s-vms/01-vm-initial-setup.yaml
 ### reboot VM
 virsh reboot <domain>
 
-### install Kubernetes ->
+### install Kubernetes or join worker node into existing cluster
 - folow "kubernetes-installation.md" file
 

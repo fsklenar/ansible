@@ -1,13 +1,13 @@
 
 ## Repository with scripts and steps for:
-- bare metal installation
+- bare metal Linux installation
 - installation of VMs for Kubernetes nodes (control plane + worker nodes)
 - Kubernetes instalation on VMs
   
 ### Basic installation of tools on clean Linux server (bare metal)
-  - ansible
-  - docker
-  - KVM hypervisor
+- ansible
+- docker
+- KVM hypervisor
 
 ### Ansible scripts
 - network configuration of linux server

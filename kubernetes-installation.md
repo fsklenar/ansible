@@ -7,3 +7,7 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documen
 ### Allow pods on control-plane  
 kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 
+### Join new worker node into cluster
+kubeadm join 192.168.0.202:6443 --token <token> \
+	--discovery-token-ca-cert-hash sha256:<cert>
+
