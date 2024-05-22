@@ -18,7 +18,7 @@
 
 ### 1. Steps for Linux host server and VMs configuration
 - [ansible_installation.md](ansible-installation.md)
-    - [var/common_vars.yaml](var/common_vars.yaml) - common variables for ansible scripts
+    - [vars/common_vars.yaml](vars/common_vars.yaml) - common variables for ansible scripts
 
 ### 2. Steps for Kubernetes installation
 - [kubernetes_installation.md](kubernetes-installation.md)
