@@ -13,11 +13,15 @@
 ### Ansible scripts
 - network configuration of linux server
 - KVM configuration
-- downloading Ubuntu cloud image for VMS and basic configuration
-- follow [ansible_installation](ansible_installation) file
-- [var/common_vars](var/common_vars) file - common variables for ansible scripts
-- [kvm-commands](kvm-commands) file - tips & trick when workling with KVM
+- downloading Ubuntu cloud image for VMs
+- configuration of VMs
 
-### Steps for Kubernetes installation
-- follow "kubernetes_installation" file
+### 1. Steps for Linux host server and VMs configuration
+- [ansible_installation.md](ansible_installation)
+    - [var/common_vars.yaml](var/common_vars) - common variables for ansible scripts
 
+### 2. Steps for Kubernetes installation
+- [kubernetes_installation.md](kubernetes_installation.md)
+
+### Tips & tricks when using KVM
+- [kvm-commands.md](kvm-commands)
