@@ -13,9 +13,9 @@
 - network configuration of linux server
 - KVM configuration
 - downloading Ubuntu cloud image for VMS and basic configuration
-- follow "ansible_installation" file
-- "var/common_vars" file - common variables for ansible scripts
-- "kvm-commands" file - tips & trick when workling with KVM
+- follow [ansible_installation](ansible_installation) file
+- [var/common_vars](var/common_vars) file - common variables for ansible scripts
+- [kvm-commands](kvm-commands) file - tips & trick when workling with KVM
 
 ### Steps for Kubernetes installation
 - follow "kubernetes_installation" file

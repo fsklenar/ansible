@@ -18,3 +18,8 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 kubeadm join 192.168.0.202:6443 --token <token> \
 	--discovery-token-ca-cert-hash sha256:<cert>
 ```
+
+### Kubernetes metrics server
+```
+follow instructions in https://github.com/kubernetes-sigs/metrics-server/
+```
