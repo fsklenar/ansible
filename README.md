@@ -17,11 +17,11 @@
 - configuration of VMs
 
 ### 1. Steps for Linux host server and VMs configuration
-- [ansible_installation.md](ansible_installation)
-    - [var/common_vars.yaml](var/common_vars) - common variables for ansible scripts
+- [ansible_installation.md](ansible_installation.md)
+    - [var/common_vars.yaml](var/common_vars.yaml) - common variables for ansible scripts
 
 ### 2. Steps for Kubernetes installation
 - [kubernetes_installation.md](kubernetes_installation.md)
 
 ### Tips & tricks when using KVM
-- [kvm-commands.md](kvm-commands)
+- [kvm-commands.md](kvm-commands.md)
