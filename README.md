@@ -1,5 +1,6 @@
 
-## Repository with scripts and steps for:
+# Deploy Linux server + Kubernetes (control-plane + 2x worker node) in few minutes using Ansible scripts
+## Repository with Ansible scripts and steps for:
 - bare metal Linux installation
 - installation of VMs for Kubernetes nodes (control plane + worker nodes)
 - Kubernetes instalation on VMs
