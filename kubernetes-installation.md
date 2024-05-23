@@ -2,11 +2,6 @@
 ```
 kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-address 192.168.0.202 --pod-network-cidr=10.244.0.0/16
 ```
-### Configure kube-config for ansible user on control-plane
-```
-ansible-playbook k8s-vms/02-vm-kube-config.yaml
-```
-
 ### Flannel installation - overlay network provider
 ```
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
@@ -22,7 +17,11 @@ kubectl taint nodes --all node-role.kubernetes.io/control-plane-
 kubeadm join 192.168.0.202:6443 --token <token> \
 	--discovery-token-ca-cert-hash sha256:<cert>
 ```
-
+### Configuration on control-plane
+```
+ansible-playbook k8s-vms/02-vm-kube-config.yaml
+```
 ### Continue with tool installation on K8S cluster
 
 - follow instructions in https://github.com/fsklenar/k8s-salaserver/blob/main/README.md
+
