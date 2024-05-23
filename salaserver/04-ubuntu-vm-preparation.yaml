@@ -25,15 +25,15 @@
 
       - name: copy netplan network file with static IP
         copy: 
-          src: vm/01-vm-netplan-network.yaml 
-          dest: /tmp/01-vm-netplan-network.yaml
+          src: vars/vm-netplan-network.yaml
+          dest: /tmp/vm-netplan-network.yaml
           mode: '0600'
           group: root
           owner: root
 
       - name: Set coorect IP to netplan network
         lineinfile:
-          path: /tmp/01-vm-netplan-network.yaml
+          path: /tmp/vm-netplan-network.yaml
           state: present
           regexp: '^                - <vm-ip>/24'
           line: '                - {{ vm_ip }}/24'
@@ -61,7 +61,7 @@
            randpass=`cat /tmp/passwordfile`
            sudo qemu-img resize "/srv/data/img/{{ vm_img_name }}" +20G
            sudo virt-customize -a "/srv/data/img/{{ vm_img_name }}" --root-password password:$randpass \
-             --upload /tmp/01-vm-netplan-network.yaml:/etc/netplan/01-vm-netplan-network.yaml \
+             --upload /tmp/vm-netplan-network.yaml:/etc/netplan/01-vm-netplan-network.yaml \
              --ssh-inject root:file:/tmp/id_rsa.pub \
              --timezone "Europe/Bratislava" \
              --uninstall openssh-server \

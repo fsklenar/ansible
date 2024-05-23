@@ -6,12 +6,37 @@
 
   tasks:
 
-    - name: Configure kube config (only on control-plane node)
-      shell: |
-        if [ ! -f $HOME/.kube/config ]; then
-            mkdir -p $HOME/.kube
-            sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-            sudo chown $(id -u):$(id -g) $HOME/.kube/config
-        fi
-      when: "'{{ controlplane_hostname }}' in inventory_hostname"
+    - block:
 
+        - name: Configure kube config (only on control-plane node)
+          shell: |
+            if [ ! -f $HOME/.kube/config ]; then
+                mkdir -p $HOME/.kube
+                sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+                sudo chown $(id -u):$(id -g) $HOME/.kube/config
+            fi
+
+        - name: create /srv/data folder
+          file:
+            path: /srv/data
+            state: directory
+            mode: '0750'
+            owner: "{{ server_username }}"
+            group: "root"
+
+        - name: Copy do-port-forward.sh script
+          copy:
+            src: scripts/do-port-forward.sh
+            dest: /srv/data
+            mode: '0700'
+            group: "{{ server_username }}"
+            owner: root
+
+        - name: Crontab - port-forward to public server every 5 minutes
+          ansible.builtin.cron:
+              name: "port forward"
+              minute: "*/5"
+              hour: "*"
+              job: "/srv/data/do-port-forward.sh"
+
+      when: "'{{ controlplane_hostname }}' in inventory_hostname"
