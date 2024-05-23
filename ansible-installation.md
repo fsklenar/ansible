@@ -35,19 +35,12 @@ k8sworker01 ansible_host=192.168.0.211
 k8sworker01 ansible_host=192.168.0.212
 ```
 
-### d) Connect to Host (Linux server) and add root's public key to public accessible server (example.com) - used for port-forwarding
-```
-sudo -i  #switch to root
-ssh-keygen  #generate private/public key
-ssh-copy-id ubuntu@example.com
-```
-
-### e) run first time 01-initial-setup playbook under default installed sudoer user with password
+### d) run first time 01-initial-setup playbook under default installed sudoer user with password
 ```
 ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
 ```
 
-### f) next run can be executed without user
+### e) next run can be executed without user
 ```
 ansible-playbook salaserver/01-initial-setup.yaml
 ansible-playbook salaserver/02-docker.yaml
@@ -85,6 +78,13 @@ ansible-playbook k8s-vms/01-vm-initial-setup.yaml
 ### d) reboot VM
 ```
 virsh reboot <domain>
+```
+
+### e) SSH Connect to `control-plane` and add root's public key to public accessible server (example.com) - used for port-forwarding
+```
+sudo -i  #switch to root
+ssh-keygen  #generate private/public key
+ssh-copy-id user_with_minimal_rights@example.com
 ```
 
 ### f) install Kubernetes or join worker node into existing cluster
