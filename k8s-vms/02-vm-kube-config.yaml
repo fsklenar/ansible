@@ -1,0 +1,17 @@
+---
+- hosts: vms
+  become: true
+  vars_files:
+    - ../vars/common_vars.yaml
+
+  tasks:
+
+    - name: Configure kube config (only on control-plane node)
+      shell: |
+        if [ ! -f $HOME/.kube/config ]; then
+            mkdir -p $HOME/.kube
+            sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+            sudo chown $(id -u):$(id -g) $HOME/.kube/config
+        fi
+      when: "'{{ controlplane_hostname }}' in inventory_hostname"
+

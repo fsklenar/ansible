@@ -35,7 +35,7 @@ k8sworker01 ansible_host=192.168.0.211
 k8sworker01 ansible_host=192.168.0.212
 ```
 
-### d) add root's public key to public accessible server (example.com) - used for port-forwarding
+### d) Connect to Host (Linux server) and add root's public key to public accessible server (example.com) - used for port-forwarding
 ```
 sudo -i  #switch to root
 ssh-keygen  #generate private/public key
@@ -87,6 +87,6 @@ ansible-playbook k8s-vms/01-vm-initial-setup.yaml
 virsh reboot <domain>
 ```
 
-### e) install Kubernetes or join worker node into existing cluster
+### f) install Kubernetes or join worker node into existing cluster
 - [kubernetes-installation.md](kubernetes-installation.md)
 

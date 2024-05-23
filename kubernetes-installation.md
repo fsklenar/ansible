@@ -2,6 +2,10 @@
 ```
 kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-address 192.168.0.202 --pod-network-cidr=10.244.0.0/16
 ```
+### Configure kube-config for ansible user on control-plane
+```
+ansible-playbook k8s-vms/02-vm-kube-config.yaml
+```
 
 ### Flannel installation - overlay network provider
 ```
