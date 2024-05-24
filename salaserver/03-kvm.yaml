@@ -45,7 +45,7 @@
         owner: "{{ server_username }}"
         group: "libvirt-qemu"
 
-    - name: create /srv/data/virtiofs folder
+    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume
       file:
         path: /srv/data/virtiofs
         state: directory

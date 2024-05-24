@@ -135,3 +135,20 @@
         state: present
         regexp: '^            SystemdCgroup = false'
         line: '            SystemdCgroup = true'
+
+    - name: create /srv/virtiofs folder for Persistent Volume
+      file:
+        path: /srv/virtiofs
+        state: directory
+        mode: '0770'
+        owner: "root"
+        group: "{{ ansible_username }}"
+
+    - name: Mount virtiofs
+      ansible.posix.mount:
+        path: /srv/virtiofs
+        src: sharedfs
+        fstype: virtiofs
+        state: present
+
+
