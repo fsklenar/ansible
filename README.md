@@ -6,7 +6,7 @@ Deploy Linux server + Kubernetes nodes in few minutes using Ansible scripts
 ## Repository with Ansible scripts and steps for:
 - Linux installation - bare metal
 - Installation of VMs for Kubernetes nodes (control plane + worker nodes)
-- Kubernetes instalation on VMs
+- Kubernetes installation on VMs
 - Installation of basic tools to Kubernetes cluster
   
 
