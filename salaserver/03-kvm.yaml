@@ -16,6 +16,7 @@
           - bridge-utils 
           - libvirt-daemon-system
           - guestfs-tools
+          - virtiofsd
         state: latest
         update_cache: true
 

@@ -67,6 +67,46 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 
   https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#creation-of-vms---control-plane-worker-nodes
 
+  ### Add memoryBacking into VM
+  ```
+  virsh edit <domain>
+  ```
+  To be able to exchange data, the memory of the guest has to be allocated as “shared”. To do so you need to add the following to the guest config:
+
+  ```
+  <memoryBacking>
+    <access mode='shared'/>
+  </memoryBacking>
+  ```
+
+  For performance reasons (it helps virtiofs, but also is generally wise to consider) it
+  is recommended to use huge pages which then would look like:
+
+  ```
+  <memoryBacking>
+    <hugepages>
+      <page size='2048' unit='KiB'/>
+    </hugepages>
+    <access mode='shared'/>
+  </memoryBacking>
+  ```
+
+### b) attach virtiofs disk - used in K8S for Persistent Volumes
+Create `virtiofs.xml` file
+
+```
+<filesystem type='mount' accessmode='passthrough'>
+   <driver type='virtiofs'/>
+   <binary path='/usr/libexec/virtiofsd'/>
+   <source dir='/srv/data/virtiofs'/>
+   <target dir='sharedfs'/>
+</filesystem>
+```
+
+```
+virsh attach-device --config <domain> --file virtiofs.xml
+```
+
 ### b) run first playbooks towards vms
 ```
 ansible-playbook salaserver/01-initial-setup.yaml -u root -l <server_name>
