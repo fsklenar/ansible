@@ -35,36 +35,41 @@ k8sworker01 ansible_host=192.168.0.211
 k8sworker01 ansible_host=192.168.0.212
 ```
 
-### d) run first time 01-initial-setup playbook under default installed sudoer user with password
+### d) first time exexute `01-initial-setup.yaml` playbook under default installed sudoer user using password authentication
 ```
 ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
 ```
 
-### e) next run can be executed without user
+### e) next run can be executed using dedicated `ansible` user
 ```
 ansible-playbook salaserver/01-initial-setup.yaml
 ansible-playbook salaserver/02-docker.yaml
 ansible-playbook salaserver/03-kvm.yaml
 
+#control-plane node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/control-plane.yaml"
 --or--
+#worker01 node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker01.yaml"
 --or--
+#workner02 node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker02.yaml"
 ```
 
 ## 4. Configuration of VMs
 ### a) start VM
 ```
+#existing VM
 virsh start <domain>
 
 ```
 --or--
 ```
+#new VM
 https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#run-vm-domain
 ```
 
-### b) run first playbook towards vms
+### b) run first playbooks towards vms
 ```
 ansible-playbook salaserver/01-initial-setup.yaml -u root -l <server_name>
 ansible-playbook salaserver/02-docker.yaml -l <server_name>
