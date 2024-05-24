@@ -35,7 +35,7 @@ k8sworker01 ansible_host=192.168.0.211
 k8sworker01 ansible_host=192.168.0.212
 ```
 
-### d) first time exexute `01-initial-setup.yaml` playbook under default installed sudoer user using password authentication
+### d) for the first time execute `01-initial-setup.yaml` playbook under default installed sudoer user using password authentication
 ```
 ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
 ```
