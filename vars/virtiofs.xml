@@ -1,0 +1,6 @@
+<filesystem type='mount' accessmode='passthrough'>
+   <driver type='virtiofs'/>
+   <binary path='/usr/libexec/virtiofsd'/>
+   <source dir='/srv/data/virtiofs'/>
+   <target dir='sharedfs'/>
+  </filesystem>
