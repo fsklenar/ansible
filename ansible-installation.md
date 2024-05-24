@@ -89,21 +89,23 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
   ```
 
   - attach virtiofs disk - used in K8S for Persistent Volumes
-  Create `virtiofs.xml` file
 
-  ```
-    <filesystem type='mount' accessmode='passthrough'>
-      <driver type='virtiofs'/>
-      <binary path='/usr/libexec/virtiofsd'/>
-      <source dir='/srv/data/virtiofs'/>
-      <target dir='sharedfs'/>
-    </filesystem>
-  ```
-  Attach device into domain
+    - Create `virtiofs.xml` file
 
-  ```
-    virsh attach-device --config <domain> --file virtiofs.xml
-  ```
+    ```
+      <filesystem type='mount' accessmode='passthrough'>
+        <driver type='virtiofs'/>
+        <binary path='/usr/libexec/virtiofsd'/>
+        <source dir='/srv/data/virtiofs'/>
+        <target dir='sharedfs'/>
+      </filesystem>
+    ```
+
+    - Attach device into domain
+
+    ```
+      virsh attach-device --config <domain> --file virtiofs.xml
+    ```
 
 ### b) run first playbooks towards vms
 ```
