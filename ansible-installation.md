@@ -61,7 +61,6 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 ```
 #Start existing VM
 virsh start <domain>
-
 ```
 --or--
 ```
