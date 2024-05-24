@@ -28,14 +28,14 @@
           copy:
             src: scripts/do-port-forward.sh
             dest: /srv/data
-            mode: '0700'
+            mode: '0740'
             group: "{{ server_username }}"
             owner: root
 
         - name: Crontab - port-forward to public server every 5 minutes
           ansible.builtin.cron:
               name: "port forward"
-              minute: "*/5"
+              minute: "*/10"
               hour: "*"
               job: "/srv/data/do-port-forward.sh"
 
