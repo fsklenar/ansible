@@ -59,13 +59,13 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 ## 4. Configuration of VMs
 ### a) start VM
 ```
-#existing VM
+#Start existing VM
 virsh start <domain>
 
 ```
 --or--
 ```
-#new VM
+#Create new VM (if not exists)
 https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#run-vm-domain
 ```
 
