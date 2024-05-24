@@ -65,8 +65,8 @@ virsh start <domain>
 --or--
 ```
 #Create new VM (if not exists)
-https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#run-vm-domain
 ```
+https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#creation-of-vms---control-plane-worker-nodes
 
 ### b) run first playbooks towards vms
 ```
