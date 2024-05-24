@@ -57,13 +57,9 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 ```
 
 ## 4. Configuration of VMs
-### a) start existing VM or create new VM
+### a) Create new VM (if not exists)
 
-  - Start existing VM
-  ```
-  virsh start <domain>
-  ```
-  - Create new VM (if not exists) - follow KVM commands
+  - follow KVM commands
 
   https://github.com/fsklenar/ansible/blob/main/kvm-commands.md#creation-of-vms---control-plane-worker-nodes
 
@@ -71,25 +67,25 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
   ```
   virsh edit <domain>
   ```
-  To be able to exchange data, the memory of the guest has to be allocated as “shared”. To do so you need to add the following to the guest config:
+    To be able to exchange data, the memory of the guest has to be allocated as “shared”. To do so you need to add the following to the guest config:
 
-  ```
-  <memoryBacking>
-    <access mode='shared'/>
-  </memoryBacking>
-  ```
+    ```
+    <memoryBacking>
+      <access mode='shared'/>
+    </memoryBacking>
+    ```
 
-  For performance reasons (it helps virtiofs, but also is generally wise to consider) it
-  is recommended to use huge pages which then would look like:
+    For performance reasons (it helps virtiofs, but also is generally wise to consider) it
+    is recommended to use huge pages which then would look like:
 
-  ```
-  <memoryBacking>
-    <hugepages>
-      <page size='2048' unit='KiB'/>
-    </hugepages>
-    <access mode='shared'/>
-  </memoryBacking>
-  ```
+    ```
+    <memoryBacking>
+      <hugepages>
+        <page size='2048' unit='KiB'/>
+      </hugepages>
+      <access mode='shared'/>
+    </memoryBacking>
+    ```
 
 ### b) attach virtiofs disk - used in K8S for Persistent Volumes
 Create `virtiofs.xml` file
