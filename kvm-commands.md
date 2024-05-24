@@ -5,7 +5,7 @@
 virsh undefine k8smaster --remove-all-storage
 ```
 
-### run VM domain
+### Creation of VMs - control-plane, worker nodes
 ```
 virt-install -n k8smaster \
 --description "Control plane K8s" \
@@ -47,7 +47,7 @@ virt-install -n k8sworker02 \
 --wait 0
 ```
 
-### connect to vm console
+### connect to VM console
 ```
 virsh --connect qemu:///system console <domain>
 ```
