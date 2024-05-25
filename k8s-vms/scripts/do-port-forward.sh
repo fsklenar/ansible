@@ -39,8 +39,8 @@ function k8s_port_forward {
 
 
 #Grafana
-k8s_port_forward prometheus-kps grafana 3000 3000
+k8s_port_forward monitoring grafana 3000 3000
 
 #Prometheus
-k8s_port_forward prometheus-kps prometheus 9090 9090
+k8s_port_forward monitoring prometheus 9090 9090
 
