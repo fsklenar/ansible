@@ -45,11 +45,19 @@
         owner: "{{ server_username }}"
         group: "libvirt-qemu"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume
+    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - prometheus
       file:
-        path: /srv/data/virtiofs
+        path: /srv/data/virtiofs/prometheus
         state: directory
-        mode: '0770'
+        mode: '0777'
+        owner: "libvirt-qemu"
+        group: "{{ server_username }}"
+
+    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - grafana
+      file:
+        path: /srv/data/virtiofs/grafana
+        state: directory
+        mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
