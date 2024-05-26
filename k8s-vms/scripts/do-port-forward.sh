@@ -46,5 +46,8 @@ k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
 k8s_port_forward monitoring prometheus 9090 9090 "10.192.168.202" false
 
 #Webapp DEV
-k8s_port_forward webapp-dev webapp-dev-svc 8090 8090 "10.192.168.202" false
+k8s_port_forward null null8090 8090 "10.192.168.202" false
+
+#WordPress DEV
+k8s_port_forward null null 8091 8091 "10.192.168.202" false
 

@@ -61,6 +61,22 @@
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
+    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - wordpress
+      file:
+        path: /srv/data/virtiofs/wordpress
+        state: directory
+        mode: '0777'
+        owner: "libvirt-qemu"
+        group: "{{ server_username }}"
+
+    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - mysql
+      file:
+        path: /srv/data/virtiofs/mysql
+        state: directory
+        mode: '0777'
+        owner: "libvirt-qemu"
+        group: "{{ server_username }}"
+
     - name: check if netplan bridge file exists
       stat:
         path: "/etc/netplan/01-bridge.yaml"
