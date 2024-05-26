@@ -29,7 +29,9 @@ function k8s_port_forward {
 
   logger "K8S-PORT-FORWARD: Port forward for pod=${TMP_POD}, namespace=$1, app=$2, source_port=$3, dest_port=$4"
 
-  kubectl port-forward -n $1 ${TMP_POD} $3:$4 &
+  if [ $5 == "true" ]; then
+    kubectl port-forward -n $1 ${TMP_POD} $3:$4 &
+  fi
 
   sleep 5
 
@@ -39,8 +41,8 @@ function k8s_port_forward {
 
 
 #Grafana
-k8s_port_forward monitoring grafana 3000 3000
+k8s_port_forward monitoring grafana 3000 3000 true
 
 #Prometheus
-k8s_port_forward monitoring prometheus 9090 9090
+k8s_port_forward monitoring prometheus 9090 9090 false
 
