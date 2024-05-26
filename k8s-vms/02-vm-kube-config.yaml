@@ -35,7 +35,7 @@
         - name: Crontab - port-forward to public server every 5 minutes
           ansible.builtin.cron:
               name: "port forward"
-              minute: "*/2"
+              minute: "*/10"
               hour: "*"
               job: "/srv/data/do-port-forward.sh"
 
