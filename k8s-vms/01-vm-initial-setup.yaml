@@ -31,26 +31,33 @@
     #     line: '192.168.0.202 cluster-endpoint'
 
 
-    - name: Add hostname to /etc/hosts
+    - name: Add hostname to /etc/hosts - controlplane
       lineinfile:
         path: /etc/hosts
         state: present
         regexp: '^{{ controlplane_hostname }}'
         line: '{{ controlplane_ip }} {{ controlplane_hostname }}'
 
-    - name: Add hostname to /etc/hosts
+    - name: Add hostname to /etc/hosts - worker01
       lineinfile:
         path: /etc/hosts
         state: present
         regexp: '^{{ worker01_hostname }}'
         line: '{{ worker01_ip }} {{ worker01_hostname }}'
 
-    - name: Add hostname to /etc/hosts
+    - name: Add hostname to /etc/hosts - worker02
       lineinfile:
         path: /etc/hosts
         state: present
         regexp: '^{{ worker02_hostname }}'
         line: '{{ worker02_ip }} {{ worker02_hostname }}'
+
+    - name: Add hostname to /etc/hosts for Web applications
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^webapp-dev'
+        line: '{{ controlplane_ip }} webapp-dev.local'
 
     - name: Set up the IPV4 bridge - overlay
       lineinfile:

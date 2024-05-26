@@ -45,3 +45,6 @@ k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
 #Prometheus
 k8s_port_forward monitoring prometheus 9090 9090 "10.192.168.202" false
 
+#Webapp DEV
+k8s_port_forward webapp-dev webapp-dev-svc 8090 8090 "webapp-dev.local" false
+
