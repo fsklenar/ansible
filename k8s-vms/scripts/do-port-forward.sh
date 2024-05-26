@@ -16,19 +16,19 @@ function do_port_forward {
 
 #params: namespace, app_name (label), source_port, dest_port, local_app_ip, kubect_portfward (true/false)
 function k8s_port_forward {
-  local TMP_POD
-  TMP_POD=""
-  while [ -z "${TMP_POD}" ]; do
-    TMP_POD="$(kubectl get pods --namespace $1 -l "app.kubernetes.io/name=$2" --field-selector=status.phase==Running --output jsonpath="{.items[0].metadata.name}")"
-    #echo "pod=${TMP_POD}"
-    sleep 10
-  done
-
-  sleep 20  #delay - to be sure pod is running
-
-  logger "K8S-PORT-FORWARD: Port forward for pod=${TMP_POD}, namespace=$1, app=$2, source_port=$3, dest_port=$4"
-
   if [ $6 == "true" ]; then #not needed if ingress is in place
+    local TMP_POD
+    TMP_POD=""
+    while [ -z "${TMP_POD}" ]; do
+      TMP_POD="$(kubectl get pods --namespace $1 -l "app.kubernetes.io/name=$2" --field-selector=status.phase==Running --output jsonpath="{.items[0].metadata.name}")"
+      #echo "pod=${TMP_POD}"
+      sleep 10
+    done
+
+    sleep 20  #delay - to be sure pod is running
+
+    logger "K8S-PORT-FORWARD: Port forward for pod=${TMP_POD}, namespace=$1, app=$2, source_port=$3, dest_port=$4"
+
     kubectl port-forward -n $1 ${TMP_POD} $3:$4 &
   fi
 
