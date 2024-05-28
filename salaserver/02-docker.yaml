@@ -65,4 +65,12 @@
             special_time: reboot
             job: "/srv/data/docker/runall.sh"
 
+        - name: Update apt and install docker-compose
+          apt:
+           pkg:
+             - docker-compose
+             - docker-compose-plugin
+           state: latest
+           update_cache: true
+
       when: "'servers' in group_names"

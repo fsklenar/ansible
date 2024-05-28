@@ -17,6 +17,7 @@
           - libvirt-daemon-system
           - guestfs-tools
           - virtiofsd
+          - docker-compose
         state: latest
         update_cache: true
 
