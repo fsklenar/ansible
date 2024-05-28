@@ -20,6 +20,14 @@
         state: latest
         update_cache: true
 
+    - name: Copy shutdown script
+      copy:
+        src: vars/shut.sh
+        dest: /usr/local/bin/shut
+        mode: '0750'
+        group: root
+        owner: "{{ server_username }}"
+
     - name: create /srv/data folder
       file:
         path: /srv/data
