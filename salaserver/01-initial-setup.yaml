@@ -107,16 +107,6 @@
         update_cache: true
       when: "'servers' in group_names"
 
-    - name: Copy shutdown script
-      copy:
-        src: vars/shut.sh
-        dest: /usr/local/bin/shut
-        mode: '0750'
-        group: root
-        owner: "{{ server_username }}"
-      
- 
-
     #- name: UFW - Allow SSH connections
       #community.general.ufw:
         #rule: allow
