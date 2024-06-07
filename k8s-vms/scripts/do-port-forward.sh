@@ -51,3 +51,6 @@ k8s_port_forward null null 8090 8090 "10.192.168.202" false
 #WordPress DEV
 k8s_port_forward null null 8091 8091 "10.192.168.202" false
 
+#Kibana
+k8s_port_forward null null 5601 5601 "10.192.168.202" false
+
