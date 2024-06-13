@@ -18,6 +18,9 @@ kubeadm join 192.168.0.202:6443 --token <token> \
 	--discovery-token-ca-cert-hash sha256:<cert>
 ```
 ### Configuration on control-plane
+**Important note**
+- replace values of `dest_ip` and `public_server` in [k8s-vms/scripts/do-port-forward.sh](k8s-vms/scripts/do-port-forward.sh) file,
+	if you want to forward your applications into public server - useful, when your home Internet does not have public IP
 ```
 ansible-playbook k8s-vms/02-vm-kube-config.yaml
 ```
