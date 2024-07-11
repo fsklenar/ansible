@@ -101,7 +101,7 @@
           - kubectl
           - kubeadm
           - kubelet
-        state: latest
+        state: present
         update_cache: true
 
     - name: Hold kubeadm
