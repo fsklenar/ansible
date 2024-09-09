@@ -49,15 +49,16 @@
         regexp: '^{{ server_username }}'
         line: '{{ server_username }} ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
-        
+
     - name: Mitigations off
       lineinfile:
         path: /etc/default/grub
         state: present
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
         line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
-        
+
     - name: Set timezone to Europe
+      become: true
       community.general.timezone:
         name: Europe/Bratislava
 
