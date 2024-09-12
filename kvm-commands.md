@@ -89,3 +89,4 @@ edit files, or recover something without the virtual machine running.
     qemu-nbd --disconnect /dev/nbd0
     rmmod nbd
 
+
