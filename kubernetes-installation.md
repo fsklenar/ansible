@@ -3,13 +3,13 @@
 kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-address 192.168.0.202 --pod-network-cidr=10.244.0.0/16
 ```
 
-### overlay network provider
-## Flannel installation -
+## overlay network provider - Flannel or Calico
+### Flannel installation -
 ```
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-## Calico installation
+### Calico installation
 https://docs.tigera.io/calico/latest/getting-started/kubernetes/helm
 ```
 helm repo add projectcalico https://docs.tigera.io/calico/charts
