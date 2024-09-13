@@ -3,8 +3,10 @@
 kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-address 192.168.0.202 --pod-network-cidr=10.244.0.0/16
 ```
 
+
 ## overlay network provider - Flannel or Calico
-### Flannel installation -
+
+### Flannel installation
 ```
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
@@ -16,7 +18,7 @@ helm repo add projectcalico https://docs.tigera.io/calico/charts
 kubectl create namespace tigera-operator
 helm install calico projectcalico/tigera-operator --version v3.28.1 --namespace tigera-operator
 ```
-
+##
 
 
 ### Allow pods on control-plane (optional)
