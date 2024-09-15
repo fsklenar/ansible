@@ -46,18 +46,18 @@ ansible-playbook salaserver/01-initial-setup.yaml
 ansible-playbook salaserver/02-docker.yaml
 ansible-playbook salaserver/03-kvm.yaml
 
-#control-plane node
+#create ontrol-plane node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/control-plane.yaml"
 --or--
-#worker01 node
+#create worker01 node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker01.yaml"
 --or--
-#workner02 node
+#create worker02 node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker02.yaml"
 ```
 
 ## 4. Configuration of VMs
-### a) Create new VM (if not exists)
+### a) Create manually new VMs - ** skip tihs step if VMs were created in previous step using ansible scripts **
 
   - follow KVM commands
 
