@@ -58,7 +58,7 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 
 ## 4. Configuration of VMs
 ### a) Create manually new VMs
-**!!!Important: skip this step if VMs were created in previous step using ansible scripts !!!**
+### !!! Important: skip this step if VMs were created in previous step using ansible scripts !!!
 
   - follow KVM commands
 
