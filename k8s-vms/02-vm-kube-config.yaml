@@ -39,4 +39,4 @@
               hour: "*"
               job: "/srv/data/do-port-forward.sh"
 
-      when: "'{{ controlplane_hostname }}' in inventory_hostname"
+      when: 'controlplane_hostname  | string in inventory_hostname'

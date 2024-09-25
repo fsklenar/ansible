@@ -101,8 +101,18 @@
           - kubectl
           - kubeadm
           - kubelet
+          - etcd-client
         state: present
         update_cache: true
+
+    - name: Install etcd-client on master node
+      apt:
+        pkg:
+          - etcd-client
+        state: present
+        update_cache: true
+      when: 'controlplane_hostname  | string in inventory_hostname'
+
 
     - name: Hold kubeadm
       dpkg_selections:

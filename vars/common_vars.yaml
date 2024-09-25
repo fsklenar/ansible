@@ -1,8 +1,8 @@
 ---
 #VMs
 kubectl_ver: "v1.29"
-runc_version: v1.1.12
-cni_version: v1.4.1
+runc_version: v1.1.14
+cni_version: v1.5.1
 controlplane_ip: 192.168.0.202
 controlplane_hostname: k8smaster 
 worker01_ip: 192.168.0.211
