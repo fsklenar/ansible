@@ -9,6 +9,8 @@ worker01_ip: 192.168.0.211
 worker01_hostname: k8sworker01 
 worker02_ip: 192.168.0.212
 worker02_hostname: k8sworker02
+worker03_ip: 192.168.0.213
+worker03_hostname: k8sworker03
 
 #common
 ansible_username: ansible

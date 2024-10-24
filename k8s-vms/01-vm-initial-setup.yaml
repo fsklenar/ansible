@@ -52,6 +52,13 @@
         regexp: '^{{ worker02_hostname }}'
         line: '{{ worker02_ip }} {{ worker02_hostname }}'
 
+    - name: Add hostname to /etc/hosts - worker03
+      lineinfile:
+        path: /etc/hosts
+        state: present
+        regexp: '^{{ worker03_hostname }}'
+        line: '{{ worker03_ip }} {{ worker03_hostname }}'
+
     - name: Add hostname to /etc/hosts for Web applications
       lineinfile:
         path: /etc/hosts

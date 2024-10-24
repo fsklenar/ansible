@@ -49,6 +49,19 @@ virt-install -n k8sworker02 \
 --virt-type kvm \
 --graphics none \
 --wait 0
+
+virt-install -n k8sworker03 \
+--description "Worker03 K8s" \
+--osinfo=ubuntu24.04 \
+--os-variant=ubuntu24.04 \
+--memory=8192 \
+--vcpus=2 \
+--disk path=/srv/data/img/ubuntu-worker-03.img \
+--network network=bridged-network \
+--import \
+--virt-type kvm \
+--graphics none \
+--wait 0
 ```
 
 ### connect to VM console

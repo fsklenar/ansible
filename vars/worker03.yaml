@@ -1,0 +1,4 @@
+---
+vm_img_name: ubuntu-worker-03.img
+vm_ip: 192.168.0.213
+vm_hostname: k8sworker03

@@ -32,7 +32,8 @@ salaserver ansible_host=192.168.0.201
 [vms]
 k8smaster ansible_host=192.168.0.202
 k8sworker01 ansible_host=192.168.0.211
-k8sworker01 ansible_host=192.168.0.212
+k8sworker02 ansible_host=192.168.0.212
+k8sworker03 ansible_host=192.168.0.213
 ```
 
 ### d) for the first time execute `01-initial-setup.yaml` playbook under default installed sudoer user using password authentication
@@ -46,7 +47,7 @@ ansible-playbook salaserver/01-initial-setup.yaml
 ansible-playbook salaserver/02-docker.yaml
 ansible-playbook salaserver/03-kvm.yaml
 
-#create ontrol-plane node
+#create control-plane node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/control-plane.yaml"
 --or--
 #create worker01 node
@@ -54,6 +55,9 @@ ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/wo
 --or--
 #create worker02 node
 ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker02.yaml"
+--or--
+#create worker03 node
+ansible-playbook salaserver/04-ubuntu-vm-preparation.yaml --extra-vars "@vars/worker03.yaml"
 ```
 
 ## 4. Configuration of VMs
