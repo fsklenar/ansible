@@ -1,0 +1,117 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - ./vars/common_vars.yaml
+
+  tasks:
+  
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: full
+  
+    - name: Install aptitude
+      apt:
+        name: aptitude
+        state: latest
+        update_cache: true
+        
+    - name: Create a new regular user with sudo privileges for "{{ ansible_username }}"
+      user:
+        name: "{{ ansible_username }}"
+        state: present
+        groups: sudo
+        append: true
+        create_home: true
+        shell: /bin/bash
+    #
+    # - name: Create a new regular user with sudo privileges for "{{ server_username }}"
+    #   user:
+    #     name: "{{ server_username }}"
+    #     state: present
+    #     groups: sudo
+    #     append: true
+    #     create_home: true
+    #     shell: /bin/bash
+
+    - name: Setup passwordless sudo for "{{ ansible_username }}"
+      lineinfile:
+        path: /etc/sudoers
+        state: present
+        regexp: '^{{ ansible_username }}'
+        line: '{{ ansible_username }} ALL=(ALL) NOPASSWD: ALL'
+        validate: '/usr/sbin/visudo -cf %s'
+
+    # - name: Setup passwordless sudo for {{ server_username }}
+    #   lineinfile:
+    #     path: /etc/sudoers
+    #     state: present
+    #     regexp: '^{{ server_username }}'
+    #     line: '{{ server_username }} ALL=(ALL) NOPASSWD: ALL'
+    #     validate: '/usr/sbin/visudo -cf %s'
+
+    - name: Mitigations off
+      lineinfile:
+        path: /etc/default/grub
+        state: present
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
+
+    - name: Set timezone to Europe
+      become: true
+      community.general.timezone:
+        name: Europe/Bratislava
+
+    # - name: Set authorized key for remote user
+    #   ansible.posix.authorized_key:
+    #     user: "{{ server_username }}"
+    #     state: present
+    #     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    - name: Set authorized key for ansible user
+      ansible.posix.authorized_key:
+        user: "{{ ansible_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    #
+    # - name: Disable password authentication for root
+    #   lineinfile:
+    #     path: /etc/ssh/sshd_config
+    #     state: present
+    #     regexp: '^#?PermitRootLogin'
+    #     line: 'PermitRootLogin prohibit-password'
+
+    - name: SSH client KeepAlive interval
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        state: present
+        regexp: '^ServerAliveInterval 120'
+        line: 'ServerAliveInterval 120'
+
+    - name: SSH client KeepAlive interval part 2
+      lineinfile:
+        path: /etc/ssh/ssh_config
+        state: present
+        regexp: '^ServerAliveCountMax 2'
+        line: 'ServerAliveCountMax 2'
+ 
+    - name: Update apt and install required system packages
+      apt:
+        pkg:
+          - curl
+          - vim
+          - git
+          - gh
+        state: latest
+        update_cache: true
+      when: "'servers' in group_names"
+
+    #- name: UFW - Allow SSH connections
+      #community.general.ufw:
+        #rule: allow
+        #name: OpenSSH
+
+    #- name: UFW - Enable and deny by default
+      #community.general.ufw:
+        #state: enabled
+        #default: deny

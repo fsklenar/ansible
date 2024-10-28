@@ -1,0 +1,3 @@
+#common
+ansible_username: ansible
+server_username: ubuntu

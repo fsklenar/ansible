@@ -1,0 +1,75 @@
+---
+- hosts: all
+  become: true
+  vars_files:
+    - ./vars/common_vars.yaml
+
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - python3-setuptools
+        state: latest
+        update_cache: true
+
+    - name: Keyrings rights, install cert
+      shell: | 
+        sudo install -m 0755 -d /etc/apt/keyrings
+        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+        sudo chmod a+r /etc/apt/keyrings/docker.asc
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Add user ansible/feri to docker group
+      user: 
+        name: "{{ item }}"
+        state: present
+        groups: docker
+        append: true
+      with_items:
+        - "{{ server_username }}"
+        - "{{ ansible_username }}"
+   
+    - block:      
+   
+        - name: Clone docker repo from github
+          git:
+            repo: 'https://github.com/fsklenar/aws-ec2-jump.git'
+            dest: /srv/data/docker
+            clone: yes
+            update: no
+
+        - name: Set owner to repo
+          ansible.builtin.file:
+            path: /srv/data/docker
+            owner: "{{ server_username }}"
+            group: "{{ server_username }}"
+            recurse: true
+            mode: o-rwx
+            
+        - name: Run all docker containers after "@reboot"
+          cron:
+            name: "Run all dockers after reboot"
+            special_time: reboot
+            job: "/srv/data/docker/runall.sh"
+
+        - name: Update apt and install docker-compose
+          apt:
+           pkg:
+             - docker-compose
+             - docker-compose-plugin
+           state: latest
+           update_cache: true
+
+      when: "'ec2-jump' in group_names"
