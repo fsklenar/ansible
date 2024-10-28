@@ -41,11 +41,24 @@
         - "{{ server_username }}"
         - "{{ ansible_username }}"
    
-    - block:      
+    - block:
+
+        - name: Copy shutdown script
+          copy:
+          src: ~/.ssh/id_rsa_github
+          dest: ~/.ssh/id_rsa_github
+          mode: '0600'
+          group: "{{ ansible_username }}"
+          owner: "{{ ansible_username }}"
+
+
+        - name: Adding SSH key
+          shell: |
+            ssh-add ~/.ssh/id_rsa_github
    
         - name: Clone docker repo from github
           git:
-            repo: 'https://github.com/fsklenar/aws-ec2-jump.git'
+            repo: 'git@github.com:fsklenar/aws-ec2-jump.git'
             dest: /srv/data/docker
             clone: yes
             update: no
