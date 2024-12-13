@@ -58,5 +58,5 @@ k8s_port_forward null null 5601 5601 "10.192.168.202" false
 k8s_port_forward null null 8443 8443 "10.192.168.202" false
 
 #ArgoCD
-kubectl port-forward svc/argocd-server -n argocd 8448:8092 &
-do_port_forward 8448 8092 "10.192.168.202"
+kubectl port-forward svc/argocd-server -n argocd 8092:8092 &
+do_port_forward 8092 8092 "127.0.0.1"
