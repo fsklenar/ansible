@@ -62,5 +62,6 @@ kubectl port-forward svc/argocd-server -n argocd 8092:8092 &
 do_port_forward 8092 8092 "127.0.0.1"
 
 #Kubernetes
-k8s_port_forward null null 6443 6443 "192.168.0.202" false
+do_port_forward 6443 6443 "192.168.0.202"
+
 
