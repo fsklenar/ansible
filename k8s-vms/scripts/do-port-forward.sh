@@ -54,8 +54,9 @@ k8s_port_forward null null 8091 8091 "10.192.168.202" false
 #Kibana
 k8s_port_forward null null 5601 5601 "10.192.168.202" false
 
-#Kubewall
-k8s_port_forward null null 8443 8443 "10.192.168.202" false
+#Dashboard
+kubectl port-forward service/kubernetes-dashboard-kong-proxy -n kubernetes-dashboard 8443:443 &
+do_port_forward 8443 8443 "127.0.0.1"
 
 #ArgoCD
 kubectl port-forward svc/argocd-server -n argocd 8092:8092 &
