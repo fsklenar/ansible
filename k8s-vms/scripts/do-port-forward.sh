@@ -40,7 +40,7 @@ function k8s_port_forward {
 
 
 #Grafana
-k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
+#k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
 
 #Prometheus
 #k8s_port_forward monitoring prometheus 9090 9090 "10.192.168.202" false
