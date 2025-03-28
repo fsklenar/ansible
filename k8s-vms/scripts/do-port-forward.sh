@@ -43,13 +43,13 @@ function k8s_port_forward {
 k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
 
 #Prometheus
-k8s_port_forward monitoring prometheus 9090 9090 "10.192.168.202" false
+#k8s_port_forward monitoring prometheus 9090 9090 "10.192.168.202" false
 
 #Webapp DEV
-k8s_port_forward null null 8090 8090 "10.192.168.202" false
+#k8s_port_forward null null 8090 8090 "10.192.168.202" false
 
 #WordPress DEV
-k8s_port_forward null null 8091 8091 "10.192.168.202" false
+#k8s_port_forward null null 8091 8091 "10.192.168.202" false
 
 #Kibana
 #k8s_port_forward null null 5601 5601 "10.192.168.202" false
@@ -65,5 +65,5 @@ kubectl port-forward svc/argocd-server -n argocd 8092:80 &
 do_port_forward 8092 8092 "127.0.0.1"
 
 #Kubernetes
-#do_port_forward 6443 6443 "192.168.0.202"
+do_port_forward 80 8899 "192.168.0.202"
 
