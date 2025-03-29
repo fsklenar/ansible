@@ -66,4 +66,5 @@ do_port_forward 8092 8092 "127.0.0.1"
 
 #Kubernetes
 do_port_forward 80 8899 "192.168.0.202"
+do_port_forward 443 8999 "192.168.0.202"
 
