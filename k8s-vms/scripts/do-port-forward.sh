@@ -53,8 +53,8 @@ function k8s_port_forward {
 
 #Kibana
 #k8s_port_forward null null 5601 5601 "10.192.168.202" false
-kubectl port-forward service/eck-kibana-kb-http -n elastic-system 5601:5601 &
-do_port_forward 5601 5601 "127.0.0.1"
+#kubectl port-forward service/eck-kibana-kb-http -n elastic-system 5601:5601 &
+#do_port_forward 5601 5601 "127.0.0.1"
 
 #Dashboard
 kubectl port-forward service/kubernetes-dashboard-kong-proxy -n kubernetes-dashboard 8443:443 &
