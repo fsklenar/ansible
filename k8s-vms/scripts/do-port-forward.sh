@@ -61,8 +61,8 @@ function k8s_port_forward {
 #do_port_forward 8443 8443 "127.0.0.1"
 
 #ArgoCD
-kubectl port-forward svc/argocd-server -n argocd 8092:80 &
-do_port_forward 8092 8092 "127.0.0.1"
+#kubectl port-forward svc/argocd-server -n argocd 8092:80 &
+#do_port_forward 8092 8092 "127.0.0.1"
 
 #Kubernetes
 #do_port_forward 80 8899 "192.168.0.202"
