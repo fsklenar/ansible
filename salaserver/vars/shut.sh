@@ -6,4 +6,8 @@ virsh shutdown k8smaster
 sync
 sleep 120
 sync
-sudo shutdown -h now
+if [[ $1 = "reboot" ]]; then
+  sudo reboot
+else
+  sudo shutdown -h now
+fi
