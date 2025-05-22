@@ -16,6 +16,7 @@ virt-install -n k8smaster \
 --osinfo=ubuntu24.04 \
 --os-variant=ubuntu24.04 \
 --memory=4096 \
+--memorybacking hugepages=yes \
 --vcpus=2 \
 --disk path=/srv/data/img/ubuntu-01.img \
 --network network=bridged-network \
@@ -29,6 +30,7 @@ virt-install -n k8sworker01 \
 --osinfo=ubuntu24.04 \
 --os-variant=ubuntu24.04 \
 --memory=8192 \
+--memorybacking hugepages=yes \
 --vcpus=2 \
 --disk path=/srv/data/img/ubuntu-worker-01.img \
 --network network=bridged-network \
@@ -41,6 +43,7 @@ virt-install -n k8sworker02 \
 --description "Worker02 K8s" \
 --osinfo=ubuntu24.04 \
 --os-variant=ubuntu24.04 \
+--memorybacking hugepages=yes \
 --memory=8192 \
 --vcpus=2 \
 --disk path=/srv/data/img/ubuntu-worker-02.img \
@@ -54,6 +57,7 @@ virt-install -n k8sworker03 \
 --description "Worker03 K8s" \
 --osinfo=ubuntu24.04 \
 --os-variant=ubuntu24.04 \
+--memorybacking hugepages=yes \
 --memory=8192 \
 --vcpus=2 \
 --disk path=/srv/data/img/ubuntu-worker-03.img \
