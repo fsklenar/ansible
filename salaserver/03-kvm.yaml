@@ -101,13 +101,13 @@
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - immich
-      file:
-        path: /srv/data/virtiofs/immich
-        state: directory
-        mode: '0777'
-        owner: "libvirt-qemu"
-        group: "{{ server_username }}"
+    # - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - immich
+    #   file:
+    #     path: /srv/data/virtiofs/immich
+    #     state: directory
+    #     mode: '0777'
+    #     owner: "libvirt-qemu"
+    #     group: "{{ server_username }}"
 
     - name: check if netplan bridge file exists
       stat:
