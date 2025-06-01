@@ -69,7 +69,7 @@
           cron:
             name: "Run sync of Foto bckup into Immich application after reboot"
             special_time: reboot
-            job: "/srv/data/docker/run-sync.sh"
+            job: "/srv/data/docker/Immich/run-sync.sh"
 
         - name: Update apt and install docker-compose
           apt:
