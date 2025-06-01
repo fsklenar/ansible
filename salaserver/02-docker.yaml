@@ -65,9 +65,9 @@
             special_time: reboot
             job: "/srv/data/docker/runall.sh"
 
-        - name: Run sync of Foto bckup into Immich applicaion after "@reboot"
+        - name: Run sync of Foto bckup into Immich application after "@reboot"
           cron:
-            name: "Run sync of Foto bckup into Immich applicaion after reboot"
+            name: "Run sync of Foto bckup into Immich application after reboot"
             special_time: reboot
             job: "/srv/data/docker/run-sync.sh"
 
