@@ -59,7 +59,7 @@
       - name: set random root password to image, netplan network configuration 
         shell: |
            randpass=`cat /tmp/passwordfile`
-           sudo qemu-img resize "/srv/data/img/{{ vm_img_name }}" +20G
+           sudo qemu-img resize "/srv/data/img/{{ vm_img_name }}" +25G
            sudo virt-customize -a "/srv/data/img/{{ vm_img_name }}" --root-password password:$randpass \
              --upload /tmp/vm-netplan-network.yaml:/etc/netplan/01-vm-netplan-network.yaml \
              --ssh-inject root:file:/tmp/id_rsa.pub \
