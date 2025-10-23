@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: servers
   become: true
   vars_files:
     - ../vars/common_vars.yaml
@@ -19,12 +19,31 @@
         state: latest
         update_cache: true
 
-    - name: Keyrings rights, install cert
-      shell: | 
-        sudo install -m 0755 -d /etc/apt/keyrings
-        sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-        sudo chmod a+r /etc/apt/keyrings/docker.asc
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - name: Keyrings - Ensure /etc/apt/keyrings directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Keyrings - Download the ASCII-armored GPG key file
+      ansible.builtin.get_url:
+        url: "https://download.docker.com/linux/ubuntu/gpg"
+        dest: "/etc/apt/keyrings/docker.asc"
+        mode: '0644'
+
+    - name: Keyrings - Add the APT repository using the binary GPG key
+      ansible.builtin.apt_repository:
+        repo: "{{ docker_repoline }}"
+        state: present
+        filename: "docker"
+        update_cache: yes
+
+    # - name: Keyrings rights, install cert
+    #   shell: |
+    #     sudo install -m 0755 -d /etc/apt/keyrings
+    #     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    #     sudo chmod a+r /etc/apt/keyrings/docker.asc
+    #     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
     - name: Update apt and install docker-ce
       apt:
@@ -64,12 +83,12 @@
             name: "Run all dockers after reboot"
             special_time: reboot
             job: "/srv/data/docker/runall.sh"
-
-        - name: Run sync of Foto bckup into Immich application after "@reboot"
-          cron:
-            name: "Run sync of Foto bckup into Immich application after reboot"
-            special_time: reboot
-            job: "/srv/data/docker/Immich/run-sync.sh"
+        #
+        # - name: Run sync of Foto backup into Immich application after "@reboot"
+        #   cron:
+        #     name: "Run sync of Foto backup into Immich application after reboot"
+        #     special_time: reboot
+        #     job: "/srv/data/docker/Immich/run-sync.sh"
 
         - name: Update apt and install docker-compose
           apt:

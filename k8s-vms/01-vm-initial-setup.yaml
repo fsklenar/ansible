@@ -94,13 +94,71 @@
         - { regexp: '^net.bridge.bridge-nf-call-ip6tables', line: 'net.bridge.bridge-nf-call-ip6tables = 1' }
         - { regexp: '^net.ipv4.ip_forward', line: 'net.ipv4.ip_forward = 1' }
 
-    - name: Keyrings rights, install cert
-      shell: |
-        sudo mkdir -p -m 755 /etc/apt/keyrings
-        curl -fsSL https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/Release.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-        echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-        sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
+
+    - name: Keyrings - Ensure /etc/apt/keyrings directory exists
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Keyrings - Download the ASCII-armored GPG key file
+      ansible.builtin.get_url:
+        url: "{{ gpg_key_url }}"
+        dest: "{{ gpg_key_temp_asc }}"
+        mode: '0644'
+
+    - name: Keyrings - De-armor the key file into binary GPG format
+      ansible.builtin.shell:
+        cmd: "gpg --dearmor -o {{ gpg_key_dest }} {{ gpg_key_temp_asc }}"
+      args:
+        creates: "{{ gpg_key_dest }}"
+
+    # - name: Keyrings - Remove the temporary ASCII key file
+    #   ansible.builtin.file:
+    #     path: "{{ gpg_key_temp_asc }}"
+    #     state: absent
+
+    - name: Keyrings - Add the APT repository using the binary GPG key
+      ansible.builtin.apt_repository:
+        repo: "{{ repository_line }}"
+        state: present
+        filename: "{{ repository_name }}"
+        update_cache: yes
+
+
+    # - name: Keyrings - Download the GPG key
+    #   ansible.builtin.get_url:
+    #     url: "https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/Release.key"
+    #     dest: "/etc/apt/keyrings/kubernetes-apt-keyring.gpg"
+    #     mode: '0644'
+    #
+    # - name: Keyrings - Add the APT repository using the GPG key
+    #   ansible.builtin.apt_repository:
+    #     repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/ /"
+    #     state: present
+    #     filename: "kubernetes.list"
+    #     update_cache: yes
+    # #
+    # - name: Keyrings rights, install cert
+    #   block:
+    #     - name: somerepo | no apt key
+    #       ansible.builtin.get_url:
+    #         url: https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/Release.key
+    #         dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    #
+    #     - name: somerepo | apt source
+    #       ansible.builtin.apt_repository:
+    #         repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/ /"
+    #         state: present
+
+    #
+    # - name: Keyrings rights, install cert
+    #   ansible.builtin.shell: |
+    #     sudo mkdir -p -m 755 /etc/apt/keyrings
+    #     curl -fsSL https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/Release.key | sudo gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    #     sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    #     echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ kubectl_ver }}/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    #     sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list   # helps tools such as command-not-found to work correctly
 
     - name: Install kubectl, kubeadm, kubelet
       apt:
@@ -136,22 +194,56 @@
         name: kubectl
         selection: hold
 
-    - name: RUNC installation
-      shell: |
-        cd /tmp
-        wget https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64
-        install -m 755 /tmp/runc.amd64 /usr/bin/runc
 
-    - name: CNI plugins
-      shell: |
-        cd /tmp
-        wget https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz
-        mkdir -p /opt/cni/bin
-        tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-{{ cni_version }}.tgz
+    - name: Download and Install runc
+      become: true
+      ansible.builtin.get_url:
+        url: '{{ runc_url }}'
+        dest: '/usr/bin/runc'
+        mode: '0755'
 
-    - name: Containerd - create default configuration
-      shell: |
-        containerd config default > /etc/containerd/config.toml
+    # - name: RUNC installation
+    #   shell: |
+    #     cd /tmp
+    #     wget https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64
+    #     install -m 755 /tmp/runc.amd64 /usr/bin/runc
+    - name: Download and Install CNI plugins
+      become: true
+      block:
+        - name: Acquire CNI Plugins archive
+          ansible.builtin.get_url:
+            url: '{{ cni_plugin_url }}/{{ cni_plugin_archive }}'
+            dest: '/tmp/{{ cni_plugin_archive }}'
+            checksum: 'sha256:{{ cni_plugin_sha256 }}'
+            mode: '0444'
+        - name: Create target CNI directory
+          ansible.builtin.file:
+            path: '{{ cni_plugin_target }}'
+            state: directory
+            mode: '0755'
+        - name: Extract plugins
+          ansible.builtin.unarchive:
+            src: '/tmp/{{ cni_plugin_archive }}'
+            dest: '{{ cni_plugin_target }}'
+            remote_src: 'yes'
+        - name: Cleanup plugin archive
+          ansible.builtin.file:
+            path: '/tmp/{{ cni_plugin_archive }}'
+            state: absent
+
+    # - name: CNI plugins
+    #   shell: |
+    #     cd /tmp
+    #     wget https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz
+    #     mkdir -p /opt/cni/bin
+    #     tar Cxzvf /opt/cni/bin cni-plugins-linux-amd64-{{ cni_version }}.tgz
+
+    # - name: Containerd - create default configuration
+    #   shell: |
+    #     containerd config default > /etc/containerd/config.toml
+
+    - name: Configure containerd
+      ansible.builtin.shell: 'containerd config default > /etc/containerd/config.toml'
 
     - name: CRI configuration
       lineinfile:
