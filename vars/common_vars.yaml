@@ -2,7 +2,7 @@
 #VMs
 kubectl_ver: "v1.33"
 
-runc_version: v1.3.2
+runc_version: v1.3.3
 runc_url: "https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64"
 
 #cni_version: v1.8.0

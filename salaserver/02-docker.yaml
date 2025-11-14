@@ -1,5 +1,5 @@
 ---
-- hosts: servers
+- hosts: all
   become: true
   vars_files:
     - ../vars/common_vars.yaml
