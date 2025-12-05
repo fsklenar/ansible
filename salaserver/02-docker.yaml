@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Docker installation
+  hosts: all
   become: true
   vars_files:
     - ../vars/common_vars.yaml
@@ -7,7 +8,7 @@
   tasks:
 
     - name: Install required system packages
-      apt:
+      ansible.builtin.apt:
         pkg:
           - apt-transport-https
           - ca-certificates
@@ -16,8 +17,9 @@
           - python3-pip
           - virtualenv
           - python3-setuptools
-        state: latest
+        state: present
         update_cache: true
+        cache_valid_time: 3600
 
     - name: Keyrings - Ensure /etc/apt/keyrings directory exists
       ansible.builtin.file:
@@ -36,50 +38,46 @@
         repo: "{{ docker_repoline }}"
         state: present
         filename: "docker"
-        update_cache: yes
-
-    # - name: Keyrings rights, install cert
-    #   shell: |
-    #     sudo install -m 0755 -d /etc/apt/keyrings
-    #     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-    #     sudo chmod a+r /etc/apt/keyrings/docker.asc
-    #     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    - name: Update apt and install docker-ce
-      apt:
-        name: docker-ce
-        state: latest
         update_cache: true
 
+    - name: Update apt and install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+        update_cache: true
+        allow_unauthenticated: false
+
     - name: Add user ansible/feri to docker group
-      user: 
+      ansible.builtin.user:
         name: "{{ item }}"
         state: present
         groups: docker
         append: true
-      with_items:
+      loop:
         - "{{ server_username }}"
         - "{{ ansible_username }}"
-   
-    - block:      
-   
+
+    - name: Docker repo
+      when: "'servers' in group_names"
+      block:
+
         - name: Clone docker repo from github
-          git:
+          ansible.builtin.git:
             repo: 'https://github.com/fsklenar/docker.git'
             dest: /srv/data/docker
-            clone: yes
-            update: no
+            clone: true
+            update: true
 
         - name: Set owner to repo
           ansible.builtin.file:
             path: /srv/data/docker
-            owner: "{{ server_username }}"
-            group: "{{ server_username }}"
+            owner: "{{ ansible_username }}"
+            group: "{{ ansible_username }}"
             recurse: true
             mode: o-rwx
-            
+
         - name: Run all docker containers after "@reboot"
-          cron:
+          ansible.builtin.cron:
             name: "Run all dockers after reboot"
             special_time: reboot
             job: "/srv/data/docker/runall.sh"
@@ -89,13 +87,11 @@
         #     name: "Run sync of Foto backup into Immich application after reboot"
         #     special_time: reboot
         #     job: "/srv/data/docker/Immich/run-sync.sh"
-
         - name: Update apt and install docker-compose
-          apt:
-           pkg:
-             - docker-compose
-             - docker-compose-plugin
-           state: latest
-           update_cache: true
-
-      when: "'servers' in group_names"
+          ansible.builtin.apt:
+            pkg:
+              - docker-compose
+              - docker-compose-plugin
+            state: present
+            update_cache: true
+            allow_unauthenticated: false

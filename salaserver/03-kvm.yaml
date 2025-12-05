@@ -1,5 +1,6 @@
 ---
-- hosts: salaserver
+- name: Configure KVM and networking on salaserver
+  hosts: salaserver
   become: true
   vars:
     my_pass: "{{ lookup('password', '/tmp/passwordfile length=15 chars=ascii_letters') }}"
@@ -8,101 +9,101 @@
 
   tasks:
     - name: Update apt and install required KVM packages
-      apt:
+      ansible.builtin.apt:
         pkg:
-          - qemu-kvm 
-          - virtinst 
-          - libvirt-clients 
-          - bridge-utils 
+          - qemu-kvm
+          - virtinst
+          - libvirt-clients
+          - bridge-utils
           - libvirt-daemon-system
           - guestfs-tools
           - virtiofsd
           - docker-compose
-        state: latest
+        state: present
         update_cache: true
 
     - name: Copy shutdown script
-      copy:
+      ansible.builtin.copy:
         src: vars/shut.sh
         dest: /usr/local/bin/shut
         mode: '0750'
         group: root
         owner: "{{ server_username }}"
 
-    - name: create /srv/data folder
-      file:
+    - name: Create /srv/data folder
+      ansible.builtin.file:
         path: /srv/data
         state: directory
         mode: '0750'
         owner: "{{ server_username }}"
         group: "libvirt-qemu"
 
-    - name: create /srv/data/iso folder
-      file:
+    - name: Create /srv/data/iso folder
+      ansible.builtin.file:
         path: /srv/data/iso
         state: directory
         mode: '0770'
         owner: "{{ server_username }}"
         group: "{{ ansible_username }}"
 
-    - name: create /srv/data/img folder
-      file:
+    - name: Create /srv/data/img folder
+      ansible.builtin.file:
         path: /srv/data/img
         state: directory
         mode: '0770'
         owner: "{{ server_username }}"
         group: "libvirt-qemu"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - prometheus
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - prometheus
+      ansible.builtin.file:
         path: /srv/data/virtiofs/prometheus
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - grafana
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - grafana
+      ansible.builtin.file:
         path: /srv/data/virtiofs/grafana
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - wordpress
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - wordpress
+      ansible.builtin.file:
         path: /srv/data/virtiofs/wordpress
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - mysql
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - mysql
+      ansible.builtin.file:
         path: /srv/data/virtiofs/mysql
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - elasticsearch
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - elasticsearch
+      ansible.builtin.file:
         path: /srv/data/virtiofs/elastic
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - immich-psql
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - immich-psql
+      ansible.builtin.file:
         path: /srv/data/virtiofs/immich-psql
         state: directory
         mode: '0777'
         owner: "libvirt-qemu"
         group: "{{ server_username }}"
 
-    - name: create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - gitlab
-      file:
+    - name: Create /srv/data/virtiofs folder for sharing into VMs as Persistent Volume - gitlab
+      ansible.builtin.file:
         path: /srv/data/virtiofs/gitlab
         state: directory
         mode: '0777'
@@ -110,51 +111,49 @@
         group: "{{ server_username }}"
 
 
-    - name: check if netplan bridge file exists
-      stat:
+    - name: Check if netplan bridge file exists
+      ansible.builtin.stat:
         path: "/etc/netplan/01-bridge.yaml"
       register: bridge_file_status
 
-    - block:
-    
-        - name: create bridge network
-          copy:
+    - name: Configure bridge network if not present
+      when: not bridge_file_status.stat.exists
+      block:
+
+        - name: Create bridge network
+          ansible.builtin.copy:
             src: vars/01-bridge.yaml
             dest: /etc/netplan/
             mode: '0600'
             group: root
-            owner: root 
+            owner: root
 
-        - name: check if netplan bridge file exists v2
-          stat:
+        - name: Check if netplan bridge file exists v2
+          ansible.builtin.stat:
             path: "/etc/netplan/01-bridge.yaml"
           register: bridge_file_v2_status
-          
-        - name: delete common network yaml file
-          file:
-            path: /etc/netplan/50-cloud-init.yaml
-            state: absent 
-          when: bridge_file_v2_status.stat.exists	        
 
-        - name: netplan apply
-          shell: |
+        - name: Delete common network yaml file
+          ansible.builtin.file:
+            path: /etc/netplan/50-cloud-init.yaml
+            state: absent
+          when: bridge_file_v2_status.stat.exists
+
+        - name: Netplan apply
+          ansible.builtin.shell: |
             sudo netplan apply
             sleep 30
 
-      when: not bridge_file_status.stat.exists
-
-      
-    - name: copy bridger xml file
-      copy: 
-        src: vars/02-kvm-bridger-network.yaml 
+    - name: Copy bridger xml file
+      ansible.builtin.copy: 
+        src: vars/02-kvm-bridger-network.yaml
         dest: /tmp/
         mode: '0600'
         group: root
         owner: root
-      
-    - name: create bridger network for KVM
-      shell: |
+
+    - name: Create bridger network for KVM
+      ansible.builtin.shell: |
         sudo virsh net-define /tmp/02-kvm-bridger-network.yaml
         sudo virsh net-start bridged-network
-        sudo virsh net-autostart bridged-network 
-      
+        sudo virsh net-autostart bridged-network

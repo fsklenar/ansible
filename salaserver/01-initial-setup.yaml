@@ -1,23 +1,23 @@
 ---
-- hosts: all
+- name: Initial server setup
+  hosts: all
   become: true
   vars_files:
     - ../vars/common_vars.yaml
 
   tasks:
-  
     - name: Update all packages to the latest version
-      apt:
+      ansible.builtin.apt:
         upgrade: full
-  
+
     - name: Install aptitude
-      apt:
+      ansible.builtin.apt:
         name: aptitude
-        state: latest
+        state: present
         update_cache: true
-        
+
     - name: Create a new regular user with sudo privileges for "{{ ansible_username }}"
-      user:
+      ansible.builtin.user:
         name: "{{ ansible_username }}"
         state: present
         groups: sudo
@@ -25,17 +25,17 @@
         create_home: true
         shell: /bin/bash
 
-    - name: Create a new regular user with sudo privileges for "{{ server_username }}" 
-      user:
+    - name: Create a new regular user with sudo privileges for "{{ server_username }}"
+      ansible.builtin.user:
         name: "{{ server_username }}"
         state: present
-        groups: sudo
+        groups: sudo,{{ ansible_username }}
         append: true
         create_home: true
         shell: /bin/bash
 
     - name: Setup passwordless sudo for "{{ ansible_username }}"
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/sudoers
         state: present
         regexp: '^{{ ansible_username }}'
@@ -43,19 +43,19 @@
         validate: '/usr/sbin/visudo -cf %s'
 
     - name: Setup passwordless sudo for {{ server_username }}
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/sudoers
         state: present
         regexp: '^{{ server_username }}'
         line: '{{ server_username }} ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
 
-    # - name: Mitigations off
-    #   lineinfile:
-    #     path: /etc/default/grub
-    #     state: present
-    #     regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
-    #     line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
+    - name: Mitigations off
+      ansible.builtin.lineinfile:
+        path: /etc/default/grub
+        state: present
+        regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+        line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
 
     - name: Set timezone to Europe
       become: true
@@ -75,28 +75,28 @@
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
     - name: Disable password authentication for root
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
         state: present
         regexp: '^#?PermitRootLogin'
         line: 'PermitRootLogin prohibit-password'
 
     - name: SSH client KeepAlive interval
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/ssh_config
         state: present
         regexp: '^ServerAliveInterval 120'
         line: 'ServerAliveInterval 120'
 
     - name: SSH client KeepAlive interval part 2
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/ssh/ssh_config
         state: present
         regexp: '^ServerAliveCountMax 2'
         line: 'ServerAliveCountMax 2'
- 
+
     - name: Update apt and install required system packages
-      apt:
+      ansible.builtin.apt:
         pkg:
           - curl
           - vim
@@ -105,16 +105,16 @@
           - cpu-checker
           - gh
           - virt-top
-        state: latest
+        state: present
         update_cache: true
       when: "'servers' in group_names"
 
-    #- name: UFW - Allow SSH connections
-      #community.general.ufw:
-        #rule: allow
-        #name: OpenSSH
+    # - name: UFW - Allow SSH connections
+    #   community.general.ufw:
+    #     rule: allow
+    #     name: OpenSSH
 
-    #- name: UFW - Enable and deny by default
-      #community.general.ufw:
-        #state: enabled
-        #default: deny
+    # - name: UFW - Enable and deny by default
+    #   community.general.ufw:
+    #     state: enabled
+    #     default: deny
