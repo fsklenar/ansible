@@ -1,8 +1,8 @@
 ---
-- hosts: docker-vm
+- hosts: gcp-servers
   become: true
   vars_files:
-    - ./vars/common_vars.yaml
+    - ./vars/common-vars.yaml
 
   tasks:
 
