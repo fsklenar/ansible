@@ -1,12 +1,12 @@
 ---
 #VMs
-kubectl_ver: "v1.33"
+kubectl_ver: "v1.34"
 
-runc_version: v1.3.3
+runc_version: v1.4.0
 runc_url: "https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64"
 
 #cni_version: v1.8.0
-cni_plugin_version: 'v1.8.0'
+cni_plugin_version: 'v1.9.0'
 cni_plugin_url: 'https://github.com/containernetworking/plugins/releases/download/{{ cni_plugin_version }}'
 cni_plugin_archive: 'cni-plugins-linux-amd64-{{ cni_plugin_version }}.tgz'
 cni_plugin_sha256: '{{ cni_plugin_url }}/cni-plugins-linux-amd64-{{ cni_plugin_version }}.tgz.sha256'
