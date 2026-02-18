@@ -13,28 +13,28 @@ function do_port_forward {
   fi
 }
 
-#params: namespace, app_name (label), source_port, dest_port, local_app_ip, kubect_portfward (true/false)
-function k8s_port_forward {
-  if [ $6 == "true" ]; then #not needed if ingress is in place
-    local TMP_POD
-    TMP_POD=""
-    while [ -z "${TMP_POD}" ]; do
-      TMP_POD="$(kubectl get pods --namespace $1 -l "app.kubernetes.io/name=$2" --field-selector=status.phase==Running --output jsonpath="{.items[0].metadata.name}")"
-      #echo "pod=${TMP_POD}"
-      sleep 10
-    done
-
-    sleep 20 #delay - to be sure pod is running
-
-    logger "K8S-PORT-FORWARD: Port forward for pod=${TMP_POD}, namespace=$1, app=$2, source_port=$3, dest_port=$4"
-
-    kubectl port-forward -n $1 ${TMP_POD} $3:$4 &
-  fi
-
-  sleep 5
-
-  do_port_forward $3 $4 $5
-}
+# #params: namespace, app_name (label), source_port, dest_port, local_app_ip, kubect_portfward (true/false)
+# function k8s_port_forward {
+#   if [ $6 == "true" ]; then #not needed if ingress is in place
+#     local TMP_POD
+#     TMP_POD=""
+#     while [ -z "${TMP_POD}" ]; do
+#       TMP_POD="$(kubectl get pods --namespace $1 -l "app.kubernetes.io/name=$2" --field-selector=status.phase==Running --output jsonpath="{.items[0].metadata.name}")"
+#       #echo "pod=${TMP_POD}"
+#       sleep 10
+#     done
+#
+#     sleep 20 #delay - to be sure pod is running
+#
+#     logger "K8S-PORT-FORWARD: Port forward for pod=${TMP_POD}, namespace=$1, app=$2, source_port=$3, dest_port=$4"
+#
+#     kubectl port-forward -n $1 ${TMP_POD} $3:$4 &
+#   fi
+#
+#   sleep 5
+#
+#   do_port_forward $3 $4 $5
+# }
 
 #Grafana
 #k8s_port_forward monitoring grafana 3000 3000 "10.192.168.202" false
@@ -63,6 +63,6 @@ function k8s_port_forward {
 
 #Kubernetes
 #do_port_forward 80 8899 "192.168.0.202"
-do_port_forward 443 8999 "192.168.0.202"
+do_port_forward 443 443 "192.168.0.202"
 #do_port_forward 8000 8000 "192.168.0.202"
 do_port_forward 8043 8043 "192.168.0.202"
