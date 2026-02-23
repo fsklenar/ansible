@@ -5,17 +5,17 @@
     - ./vars/common-vars.yaml
 
   tasks:
-  
+
     - name: Update all packages to the latest version
       apt:
         upgrade: full
-  
+
     - name: Install aptitude
       apt:
         name: aptitude
         state: latest
         update_cache: true
-        
+
     - name: Create a new regular user with sudo privileges for "{{ ansible_username }}"
       user:
         name: "{{ ansible_username }}"
