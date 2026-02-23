@@ -1,6 +1,9 @@
 #!/bin/bash
+#dest_ip="10.14.0.5"
+#public_server="salauser@linuxadmin.sk"
+
 dest_ip="10.14.0.5"
-public_server="salauser@linuxadmin.sk"
+public_server="salauser@proxy.linuxadmin.eu"
 
 #params: source_port, dest_port
 function do_port_forward {
