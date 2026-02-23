@@ -63,6 +63,6 @@ function do_port_forward {
 
 #Kubernetes
 #do_port_forward 80 8899 "192.168.0.202"
-do_port_forward 443 443 "192.168.0.202"
+#do_port_forward 443 443 "192.168.0.202"
 #do_port_forward 8000 8000 "192.168.0.202"
 do_port_forward 8043 8043 "192.168.0.202"

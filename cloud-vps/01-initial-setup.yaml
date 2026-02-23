@@ -1,5 +1,5 @@
 ---
-- hosts: gcp-servers
+- hosts: cloud-vps
   become: true
   vars_files:
     - ./vars/common-vars.yaml
@@ -24,15 +24,15 @@
         append: true
         create_home: true
         shell: /bin/bash
-    #
-    # - name: Create a new regular user with sudo privileges for "{{ server_username }}"
-    #   user:
-    #     name: "{{ server_username }}"
-    #     state: present
-    #     groups: sudo
-    #     append: true
-    #     create_home: true
-    #     shell: /bin/bash
+
+    - name: Create a new regular user with sudo privileges for "{{ server_username }}"
+      user:
+        name: "{{ server_username }}"
+        state: present
+        groups: sudo
+        append: true
+        create_home: true
+        shell: /bin/bash
 
     - name: Setup passwordless sudo for "{{ ansible_username }}"
       lineinfile:
@@ -55,18 +55,18 @@
         path: /etc/default/grub
         state: present
         regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
-        line: 'GRUB_CMDLINE_LINUX_DEFAULT="mitigations=off"'
+        line: 'GRUB_CMDLINE_LINUX="mitigations=off"'
 
     - name: Set timezone to Europe
       become: true
       community.general.timezone:
         name: Europe/Bratislava
 
-    # - name: Set authorized key for remote user
-    #   ansible.posix.authorized_key:
-    #     user: "{{ server_username }}"
-    #     state: present
-    #     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    - name: Set authorized key for remote user
+      ansible.posix.authorized_key:
+        user: "{{ server_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
     - name: Set authorized key for ansible user
       ansible.posix.authorized_key:
@@ -100,8 +100,8 @@
         pkg:
           - curl
           - vim
-          - git
-          - gh
+          # - git
+          # - gh
         state: latest
         update_cache: true
 
