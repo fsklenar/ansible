@@ -1,5 +1,5 @@
-#Wireguard server IP or domain
-wg_server_host: "46.225.229.206"
+wg_server_host: proxy.linuxadmin.eu
+
 
 # WireGuard interface settings
 wg_interface: wg0
