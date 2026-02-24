@@ -4,19 +4,19 @@
 ``ansible-galaxy collection install ansible.posix
 
 ## Full install (first time)
-``ansible-playbook -i inventory/hosts.yml wireguard.yml
+```ansible-playbook -i inventory/hosts.yml wireguard.yml```
 
 ## Only update peers (no reinstall, no restart)
-ansible-playbook -i inventory/hosts.yml add-peers.yml
+```ansible-playbook -i inventory/hosts.yml add-peers.yml```
 
 ## Run only peer-tagged tasks
-ansible-playbook -i inventory/hosts.yml wireguard.yml --tags peers
+```ansible-playbook -i inventory/hosts.yml wireguard.yml --tags peers```
 
 ## Dry run
-ansible-playbook -i inventory/hosts.yml wireguard.yml --check
+```ansible-playbook -i inventory/hosts.yml wireguard.yml --check```
 
 ## Check current WireGuard status on server
-ansible wireguard -i inventory/hosts.yml -m shell -a "wg show" --become
+```ansible wireguard -i inventory/hosts.yml -m shell -a "wg show" --become```
 
 ### Adding a New Peer
 Just append to ``peers/peers.yml`` and run the peers-only playbook:
