@@ -1,10 +1,10 @@
 # Usage
 
 ## Install dependencies
-ansible-galaxy collection install ansible.posix
+``ansible-galaxy collection install ansible.posix
 
 ## Full install (first time)
-ansible-playbook -i inventory/hosts.yml wireguard.yml
+``ansible-playbook -i inventory/hosts.yml wireguard.yml
 
 ## Only update peers (no reinstall, no restart)
 ansible-playbook -i inventory/hosts.yml add-peers.yml
