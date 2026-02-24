@@ -34,6 +34,13 @@
         create_home: true
         shell: /bin/bash
 
+    - name: Create a new regular user for salauser
+      user:
+        name: "salauser"
+        state: present
+        create_home: true
+        shell: /bin/bash
+
     - name: Setup passwordless sudo for "{{ ansible_username }}"
       lineinfile:
         path: /etc/sudoers
@@ -73,6 +80,12 @@
         user: "{{ ansible_username }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    - name: Set authorized key for salauser user
+      ansible.posix.authorized_key:
+        user: "salauser"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa_salauser.pub') }}"
 
     - name: Disable password authentication for root
       lineinfile:
