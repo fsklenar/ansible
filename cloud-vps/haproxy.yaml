@@ -1,0 +1,33 @@
+- hosts: cloud-vps-haproxy
+  become: true
+  vars_files:
+    - ./vars/common-vars.yaml
+
+  tasks:
+
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: full
+
+    - name: Install HAProxy
+      apt:
+        name: haproxy
+        state: latest
+        update_cache: true
+
+    - name: Copy haproxy.cfg to server
+      copy:
+        src: vars/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Enable and start HAProxy service
+      ansible.builtin.systemd_service:
+        name: "haproxy.service"
+        enabled: true
+        state: reloaded
+        daemon_reload: true
+
+
