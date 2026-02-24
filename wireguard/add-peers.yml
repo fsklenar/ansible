@@ -16,6 +16,15 @@
       ansible.builtin.debug:
         msg: "Applying {{ wg_active_peers | length }} peer(s): {{ wg_active_peers | map(attribute='name') | list }}"
 
+    - name: Read existing private key
+      slurp:
+        src: "{{ wg_config_dir }}/server_private.key"
+      register: wg_private_key_slurped
+
+    - name: Set private key fact
+      set_fact:
+        wg_server_private_key: "{{ wg_private_key_slurped.content | b64decode | trim }}"
+
     - name: Update WireGuard config
       ansible.builtin.template:
         src: roles/wireguard/templates/wg0.conf.j2
