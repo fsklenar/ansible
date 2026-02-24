@@ -28,6 +28,6 @@ Just append to ``peers/peers.yml`` and run the peers-only playbook:
     persistent_keepalive: 25
     enabled: true
 
-```ansible-playbook -i inventory/hosts.yml add-peers.yml --ask-vault-pass```
+```ansible-playbook -i inventory/hosts.yml add-peers.yml```
 
 The ```wg syncconf``` command applies changes live without dropping existing connections.
