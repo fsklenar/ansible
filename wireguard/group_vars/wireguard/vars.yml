@@ -1,3 +1,6 @@
+#Wireguard server IP or domain
+wg_server_host: "46.225.229.206"
+
 # WireGuard interface settings
 wg_interface: wg0
 wg_port: 51820
