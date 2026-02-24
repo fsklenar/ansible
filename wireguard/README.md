@@ -21,13 +21,15 @@
 ### Adding a New Peer
 Just append to ``peers/peers.yml`` and run the peers-only playbook:
 
+```
   - name: "desktop-charlie"
     public_key: "NEW_PEER_PUBLIC_KEY"
     allowed_ips: "10.8.0.5/32"
     preshared_key: ""
     persistent_keepalive: 25
     enabled: true
-
+```
+    
 ```ansible-playbook -i inventory/hosts.yml add-peers.yml```
 
 The ```wg syncconf``` command applies changes live without dropping existing connections.
