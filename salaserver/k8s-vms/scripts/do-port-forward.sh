@@ -2,7 +2,7 @@
 #dest_ip="10.14.0.5"
 #public_server="salauser@linuxadmin.sk"
 
-dest_ip="127.0.0.1"
+dest_ip="10.8.0.1"
 public_server="salauser@proxy.linuxadmin.eu"
 
 #params: source_port, dest_port
