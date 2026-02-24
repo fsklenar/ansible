@@ -1,0 +1,24 @@
+---
+- name: Ensure WireGuard config directory exists
+  ansible.builtin.file:
+    path: "{{ wg_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Generate WireGuard server config
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: "{{ wg_config_dir }}/{{ wg_interface }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: restart wireguard
+
+- name: Enable and start WireGuard service
+  ansible.builtin.systemd:
+    name: "wg-quick@{{ wg_interface }}"
+    enabled: true
+    state: started
+    daemon_reload: true

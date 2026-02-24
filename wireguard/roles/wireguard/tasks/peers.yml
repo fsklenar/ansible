@@ -1,0 +1,27 @@
+---
+- name: Set active peers list
+  ansible.builtin.set_fact:
+    wg_active_peers: "{{ peers | selectattr('enabled', 'equalto', true) | list }}"
+  when: peers is defined
+
+- name: Show peers to be configured
+  ansible.builtin.debug:
+    msg: "Configuring {{ wg_active_peers | length }} peer(s): {{ wg_active_peers | map(attribute='name') | list }}"
+  when: wg_active_peers is defined
+
+- name: Update WireGuard config with peers
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: "{{ wg_config_dir }}/{{ wg_interface }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: reload wireguard
+
+- name: Sync peers using wg syncconf (no restart needed)
+  ansible.builtin.shell: |
+    wg syncconf {{ wg_interface }} <(wg-quick strip {{ wg_interface }})
+  args:
+    executable: /bin/bash
+  changed_when: false
+  when: wg_active_peers is defined and wg_active_peers | length > 0

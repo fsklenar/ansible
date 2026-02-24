@@ -1,0 +1,38 @@
+---
+- name: Add/update WireGuard peers
+  hosts: wireguard
+  become: true
+
+  tasks:
+    - name: Load peers from file
+      ansible.builtin.include_vars:
+        file: "{{ playbook_dir }}/peers/peers.yml"
+
+    - name: Set active peers
+      ansible.builtin.set_fact:
+        wg_active_peers: "{{ peers | selectattr('enabled', 'equalto', true) | list }}"
+
+    - name: Show peers being applied
+      ansible.builtin.debug:
+        msg: "Applying {{ wg_active_peers | length }} peer(s): {{ wg_active_peers | map(attribute='name') | list }}"
+
+    - name: Update WireGuard config
+      ansible.builtin.template:
+        src: roles/wireguard/templates/wg0.conf.j2
+        dest: "/etc/wireguard/{{ wg_interface }}.conf"
+        owner: root
+        group: root
+        mode: "0600"
+      vars:
+        wg_peers_file: "{{ playbook_dir }}/peers/peers.yml"
+
+    - name: Sync peers without restart
+      ansible.builtin.shell: |
+        wg syncconf {{ wg_interface }} <(wg-quick strip {{ wg_interface }})
+      args:
+        executable: /bin/bash
+      changed_when: false
+
+  vars_files:
+    - group_vars/wireguard/vars.yml
+    - group_vars/wireguard/vault.yml

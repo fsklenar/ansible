@@ -1,0 +1,36 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_facts["os_family"] == "Debian"
+
+- name: Install WireGuard (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name:
+      - wireguard
+      - wireguard-tools
+      - iptables
+      - python3-pip
+    state: present
+  when: ansible_facts["os_family"] == "Debian"
+
+- name: Install WireGuard (RHEL/CentOS)
+  ansible.builtin.dnf:
+    name:
+      - wireguard-tools
+      - iptables
+    state: present
+  when: ansible_facts["os_family"] == "RedHat"
+
+- name: Enable IP forwarding
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    sysctl_set: true
+    state: present
+    reload: true
+  loop:
+    - net.ipv4.ip_forward
+    - net.ipv6.conf.all.forwarding
+  when: wg_enable_ip_forward

@@ -1,0 +1,13 @@
+peers:
+  - name: "ubu-desktop"
+    public_key: "/l6LvEh4QG1ICEQ16IoK84sOOsWAu/SE/I/xpAxB+VY="
+    allowed_ips: "10.8.0.2/32"
+    preshared_key: ""                     # optional, leave empty if not used
+    persistent_keepalive: 25
+    enabled: true
+  - name: "feri-android"
+    public_key: "J67kxK7c4TcQcgO66rzcTUKT8IJO9pUYfBT1Zvu4LDM="
+    allowed_ips: "10.8.0.5/32"
+    preshared_key: ""                     # optional, leave empty if not used
+    persistent_keepalive: 25
+    enabled: true

@@ -1,0 +1,14 @@
+---
+- name: Install and configure WireGuard server
+  hosts: wireguard
+  become: true
+
+  pre_tasks:
+    - name: Gather facts
+      ansible.builtin.gather_facts:
+
+  roles:
+    - role: wireguard
+
+  vars:
+    wg_peers_file: "{{ playbook_dir }}/peers/peers.yml"

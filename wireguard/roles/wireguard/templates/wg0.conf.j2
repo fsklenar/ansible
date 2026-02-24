@@ -1,0 +1,30 @@
+# Managed by Ansible — do not edit manually
+# Last updated: {{ ansible_facts["date_time"]["iso8601"] }}
+
+[Interface]
+Address = {{ wg_address }}
+ListenPort = {{ wg_port }}
+PrivateKey = {{ wg_server_private_key }}
+
+{% if wg_post_up is defined and wg_post_up | length > 0 %}
+PostUp = {{ wg_post_up | join('; ') }}
+{% endif %}
+{% if wg_post_down is defined and wg_post_down | length > 0 %}
+PostDown = {{ wg_post_down | join('; ') }}
+{% endif %}
+
+{% if wg_active_peers is defined and wg_active_peers | length > 0 %}
+{% for peer in wg_active_peers %}
+# Peer: {{ peer.name }}
+[Peer]
+PublicKey = {{ peer.public_key }}
+AllowedIPs = {{ peer.allowed_ips }}
+{% if peer.preshared_key is defined and peer.preshared_key | length > 0 %}
+PresharedKey = {{ peer.preshared_key }}
+{% endif %}
+{% if peer.persistent_keepalive is defined and peer.persistent_keepalive > 0 %}
+PersistentKeepalive = {{ peer.persistent_keepalive }}
+{% endif %}
+
+{% endfor %}
+{% endif %}

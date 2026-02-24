@@ -1,0 +1,32 @@
+# WireGuard interface settings
+wg_interface: wg0
+wg_port: 51820
+wg_address: "10.8.0.1/24"
+wg_dns: "1.1.1.1, 8.8.8.8"
+wg_config_dir: /etc/wireguard
+wg_peers_file: "{{ playbook_dir }}/peers/peers.yml"
+
+# Network settings
+wg_server_public_ip: "{{ ansible_host }}"
+wg_allowed_ips: "0.0.0.0/0, ::/0"      # for full-tunnel (route all traffic)
+# wg_allowed_ips: "10.0.0.0/24"         # for split-tunnel (VPN network only)
+
+wg_persistent_keepalive: 25
+
+# IP forwarding
+wg_enable_ip_forward: true
+
+# Post up/down rules for NAT
+wg_post_up:
+  - "iptables -A FORWARD -i {{ wg_interface }} -j ACCEPT"
+  - "iptables -A FORWARD -o {{ wg_interface }} -j ACCEPT"
+  - "iptables -t nat -A POSTROUTING -o {{ ansible_facts.default_ipv4.interface }} -j MASQUERADE"
+  - "ip6tables -A FORWARD -i {{ wg_interface }} -j ACCEPT"
+  - "ip6tables -t nat -A POSTROUTING -o {{ ansible_facts.default_ipv4.interface }} -j MASQUERADE"
+
+wg_post_down:
+  - "iptables -D FORWARD -i {{ wg_interface }} -j ACCEPT"
+  - "iptables -D FORWARD -o {{ wg_interface }} -j ACCEPT"
+  - "iptables -t nat -D POSTROUTING -o {{ ansible_facts.default_ipv4.interface }} -j MASQUERADE"
+  - "ip6tables -D FORWARD -i {{ wg_interface }} -j ACCEPT"
+  - "ip6tables -t nat -D POSTROUTING -o {{ ansible_facts.default_ipv4.interface }} -j MASQUERADE"

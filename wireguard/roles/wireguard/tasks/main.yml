@@ -1,0 +1,18 @@
+---
+- name: Load peers from external file
+  ansible.builtin.include_vars:
+    file: "{{ wg_peers_file }}"
+  when: wg_peers_file is defined and wg_peers_file | length > 0
+  tags: [wireguard, peers]
+
+- name: Run install tasks
+  ansible.builtin.include_tasks: install.yml
+  tags: [wireguard, install]
+
+- name: Run configure tasks
+  ansible.builtin.include_tasks: configure.yml
+  tags: [wireguard, configure]
+
+- name: Run peer tasks
+  ansible.builtin.include_tasks: peers.yml
+  tags: [wireguard, peers]
