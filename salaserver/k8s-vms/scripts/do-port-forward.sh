@@ -16,6 +16,13 @@ function do_port_forward {
   fi
 }
 
+# #adding this to ~/.ssh/config file to avoid -> WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED:
+# Host 10.8.0.*
+#     StrictHostKeyChecking no
+#     UserKnownHostsFile /dev/null
+
+
+
 # #params: namespace, app_name (label), source_port, dest_port, local_app_ip, kubect_portfward (true/false)
 # function k8s_port_forward {
 #   if [ $6 == "true" ]; then #not needed if ingress is in place

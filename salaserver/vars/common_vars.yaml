@@ -14,6 +14,7 @@ cni_plugin_target: '/opt/cni/bin'
 
 controlplane_ip: 192.168.0.202
 controlplane_hostname: k8smaster 
+haproxy_server: "proxy.linuxadmin.eu"
 
 worker01_ip: 192.168.0.211
 worker01_hostname: k8sworker01 

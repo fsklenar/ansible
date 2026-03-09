@@ -2,6 +2,10 @@
   become: true
   vars_files:
     - ./vars/common-vars.yaml
+  vars_prompt:
+    - name: "manual_password"
+      prompt: "Enter password for {{ salauser_username }}"
+      private: yes # Hides your typing
 
   tasks:
 
@@ -14,6 +18,13 @@
         name: haproxy
         state: latest
         update_cache: true
+    #
+    # - name: Install python3-passlib
+    #   apt:
+    #     name: python3-passlib
+    #     state: latest
+    #     update_cache: true
+
 
     - name: Copy haproxy.cfg to server
       copy:
@@ -29,5 +40,10 @@
         enabled: true
         state: reloaded
         daemon_reload: true
+
+    - name: "Update user password for {{ server_username }}"
+      ansible.builtin.user:
+        name: "{{ server_username }}"
+        password: "{{ manual_password | ansible.builtin.password_hash('sha512') }}"
 
 
