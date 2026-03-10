@@ -35,8 +35,32 @@
         - name: Crontab - port-forward to public server every 5 minutes
           ansible.builtin.cron:
               name: "port forward"
-              minute: "*/10"
+              minute: "*/5"
               hour: "*"
               job: "/srv/data/do-port-forward.sh"
+
+        # avoid: "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
+        - name: Remove the old fingerprint of the external server from this machine
+          ansible.builtin.known_hosts:
+            # This points to the known_hosts file of the user on THIS server
+            path: "/root/.ssh/known_hosts"
+            name: "{{ haproxy_server }}"
+            state: absent
+
+        - name: "Optional: Automatically 're-learn' the new key (Non-interactive)"
+          # This prevents the "Are you sure you want to connect?" prompt later
+          ansible.builtin.shell: "ssh-keyscan -H {{ haproxy_server }} >> /root/.ssh/known_hosts"
+          register: keyscan_result
+          changed_when: "keyscan_result.rc == 0"
+        #
+        # - name: Test the connection to the external server
+        #   ansible.builtin.command: "ssh -o BatchMode=yes {{ haproxy_server }} 'uptime'"
+        #   register: ssh_test
+        #   ignore_errors: yes
+        #
+        # - name: Report status
+        #   ansible.builtin.debug:
+        #     msg: "Connection test output: {{ ssh_test.stdout }}"
+
 
       when: 'controlplane_hostname  | string in inventory_hostname'

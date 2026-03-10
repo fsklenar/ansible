@@ -48,10 +48,18 @@
     mode: '0644'
   when: not wg_config.stat.exists
 
+- name: Read public key file
+  ansible.builtin.slurp:
+    src: "{{ wg_config_dir }}/server_public.key"
+  register: server_public_key
+
+- name: Show public key content
+  ansible.builtin.debug:
+    msg: "{{ server_public_key['content'] | b64decode }}"
 
 
 - name: Read existing private key
-  slurp:
+  ansible.builtin.slurp:
     src: "{{ wg_config_dir }}/server_private.key"
   register: wg_private_key_slurped
   when: wg_config.stat.exists
