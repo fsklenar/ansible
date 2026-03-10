@@ -4,3 +4,10 @@ server_username: ubuntu
 salauser_username: salauser
 
 docker_repoline: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable"
+
+ssl_dir: /etc/haproxy/certs
+ssl_key: "{{ ssl_dir }}/key.pem"
+ssl_cert: "{{ ssl_dir }}/cert.pem"
+ssl_combined: "{{ ssl_dir }}/default.pem"
+ssl_cn: "localhost"
+ssl_days: 365

@@ -2,10 +2,6 @@
   become: true
   vars_files:
     - ./vars/common-vars.yaml
-  vars_prompt:
-    - name: "manual_password"
-      prompt: "Enter password for {{ salauser_username }}"
-      private: yes # Hides your typing
 
   tasks:
 
@@ -18,13 +14,6 @@
         name: haproxy
         state: latest
         update_cache: true
-    #
-    # - name: Install python3-passlib
-    #   apt:
-    #     name: python3-passlib
-    #     state: latest
-    #     update_cache: true
-
 
     - name: Copy haproxy.cfg to server
       copy:
@@ -34,16 +23,60 @@
         group: root
         mode: '0644'
 
+
+    - name: Ensure certs directory exists
+      ansible.builtin.file:
+        path: "{{ ssl_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Generate self-signed SSL certificate
+      ansible.builtin.command:
+        cmd: >
+          openssl req -x509
+          -newkey rsa:4096
+          -keyout {{ ssl_key }}
+          -out {{ ssl_cert }}
+          -days {{ ssl_days }}
+          -nodes
+          -subj "/CN={{ ssl_cn }}"
+
+    - name: Set permissions on key and cert
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ ssl_key }}"
+        - "{{ ssl_cert }}"
+
+    - name: Combine cert and key into HAProxy PEM bundle
+      ansible.builtin.shell:
+        cmd: "cat {{ ssl_cert }} {{ ssl_key }} > {{ ssl_combined }}"
+
+    - name: Set permissions on combined PEM
+      ansible.builtin.file:
+        path: "{{ ssl_combined }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Copy WG public key into index.html
+      ansible.builtin.copy:
+        src: /etc/wireguard/server_public.key
+        dest: /etc/haproxy/index.html
+        owner: root
+        group: haproxy
+        mode: '0644'
+        remote_src: true
+
     - name: Enable and start HAProxy service
       ansible.builtin.systemd_service:
         name: "haproxy.service"
         enabled: true
         state: reloaded
         daemon_reload: true
-
-    - name: "Update user password for {{ server_username }}"
-      ansible.builtin.user:
-        name: "{{ server_username }}"
-        password: "{{ manual_password | ansible.builtin.password_hash('sha512') }}"
-
 
