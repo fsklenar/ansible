@@ -64,7 +64,7 @@
         group: root
         mode: "0600"
 
-    - name: Copy WG public key into index.html
+    - name: Copy WG public key into index.html - make it publicly visible from Internet (for my purpose)
       ansible.builtin.copy:
         src: /etc/wireguard/server_public.key
         dest: /etc/haproxy/index.html
