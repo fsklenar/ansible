@@ -5,9 +5,20 @@ salauser_username: salauser
 
 docker_repoline: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu noble stable"
 
+#SSL cert selfsigned
 ssl_dir: /etc/haproxy/certs
 ssl_key: "{{ ssl_dir }}/key.pem"
 ssl_cert: "{{ ssl_dir }}/cert.pem"
 ssl_combined: "{{ ssl_dir }}/default.pem"
 ssl_cn: "localhost"
 ssl_days: 365
+
+#Cloudflare DNS record
+cloudflare_api_token: "{{ lookup('env', 'CF_API_TOKEN') }}"
+zone_name: "linuxadmin.eu"
+zone_id: "231e069319e31f0737be52ce6c0bf5a8"        # ← Cloudflare dashboard → your domain → Overview → Zone ID
+dns_record:
+  name: "proxy.linuxadmin.eu"
+  type: "A"                    # A, CNAME, MX, TXT, etc.
+  proxied: false               # true to enable Cloudflare proxy
+  ttl: 60

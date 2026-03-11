@@ -1,0 +1,58 @@
+---
+- name: Update Cloudflare DNS Record
+  hosts: localhost
+  become: false
+  vars_files:
+    - ./vars/common-vars.yaml
+  vars:
+    ipcontent: "{{ dns_content | mandatory('dns_content is required. Pass it with -e dns_content=1.2.3.4') }}"
+
+  tasks:
+
+    - name: Get existing DNS record
+      ansible.builtin.uri:
+        url: "https://api.cloudflare.com/client/v4/zones/{{ zone_id }}/dns_records?type={{ dns_record.type }}&name={{ dns_record.name }}"
+        method: GET
+        headers:
+          Authorization: "Bearer {{ cloudflare_api_token }}"
+          Content-Type: "application/json"
+        status_code: 200
+      register: existing_record
+
+    - name: Create DNS record (if not exists)
+      ansible.builtin.uri:
+        url: "https://api.cloudflare.com/client/v4/zones/{{ zone_id }}/dns_records"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ cloudflare_api_token }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          type: "{{ dns_record.type }}"
+          name: "{{ dns_record.name }}"
+          content: "{{ dns_content }}"
+          ttl: "{{ dns_record.ttl }}"
+          proxied: "{{ dns_record.proxied }}"
+        status_code: 200
+      when: existing_record.json.result | length == 0
+
+    - name: Update DNS record (if exists)
+      ansible.builtin.uri:
+        url: "https://api.cloudflare.com/client/v4/zones/{{ zone_id }}/dns_records/{{ existing_record.json.result[0].id }}"
+        method: PUT
+        headers:
+          Authorization: "Bearer {{ cloudflare_api_token }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          type: "{{ dns_record.type }}"
+          name: "{{ dns_record.name }}"
+          content: "{{ dns_content }}"
+          ttl: "{{ dns_record.ttl }}"
+          proxied: "{{ dns_record.proxied }}"
+        status_code: 200
+      when: existing_record.json.result | length > 0
+
+    - name: Show result
+      ansible.builtin.debug:
+        msg: "DNS record {{ dns_record.name }} → {{ dns_content }} updated successfully."
