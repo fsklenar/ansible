@@ -32,7 +32,20 @@
         group: root
         mode: "0755"
 
-    - name: Generate self-signed SSL certificate
+    - name: Write provided SSL certificate to file
+      ansible.builtin.copy:
+        content: "{{ sslcert | b64decode}}"
+        dest: "{{ ssl_cert }}"
+      when: sslcert is defined and sslcert | length > 0
+
+    - name: Write provided SSL key to file
+      ansible.builtin.copy:
+        content: "{{ sslkey | b64decode}}"
+        dest: "{{ ssl_key }}"
+      when: sslkey is defined and sslkey | length > 0
+
+
+    - name: Generate self-signed SSL certificate, if SSL cert was not provided
       ansible.builtin.command:
         cmd: >
           openssl req -x509
@@ -42,6 +55,7 @@
           -days {{ ssl_days }}
           -nodes
           -subj "/CN={{ ssl_cn }}"
+      when: sslcert is not defined or sslcert | length == 0
 
     - name: Set permissions on key and cert
       ansible.builtin.file:
