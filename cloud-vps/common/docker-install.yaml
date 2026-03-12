@@ -2,7 +2,7 @@
 - hosts: cloud-vps
   become: true
   vars_files:
-    - ./vars/common-vars.yaml
+    - ../vars/common-vars.yaml
 
   tasks:
 

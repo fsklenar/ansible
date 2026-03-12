@@ -1,7 +1,7 @@
 - hosts: cloud-vps-haproxy
   become: true
   vars_files:
-    - ./vars/common-vars.yaml
+    - ../vars/common-vars.yaml
 
   tasks:
 
@@ -17,7 +17,7 @@
 
     - name: Copy haproxy.cfg to server
       copy:
-        src: vars/haproxy.cfg
+        src: ../vars/haproxy.cfg
         dest: /etc/haproxy/haproxy.cfg
         owner: root
         group: root
