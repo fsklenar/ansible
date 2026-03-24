@@ -9,6 +9,10 @@
 
   tasks:
 
+    # - name: Show result
+    #   ansible.builtin.debug:
+    #     msg: "ZoneID {{ zone_id }}, token: {{ cloudflare_api_token }}"
+
     - name: Get existing DNS record
       ansible.builtin.uri:
         url: "https://api.cloudflare.com/client/v4/zones/{{ zone_id }}/dns_records?type={{ dns_record.type }}&name={{ dns_record.name }}"
