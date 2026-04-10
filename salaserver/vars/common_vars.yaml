@@ -1,6 +1,6 @@
 ---
 #VMs
-kubectl_ver: "v1.34"
+kubectl_ver: "v1.35"
 
 runc_version: v1.4.0
 runc_url: "https://github.com/opencontainers/runc/releases/download/{{ runc_version }}/runc.amd64"
