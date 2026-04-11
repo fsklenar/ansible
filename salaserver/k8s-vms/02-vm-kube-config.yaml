@@ -1,5 +1,5 @@
 ---
-- hosts: vms
+- hosts: "{{ target_hosts | default('vms') }}"
   become: true
   vars_files:
     - ../vars/common_vars.yaml
