@@ -4,6 +4,7 @@
   become: false
   vars_files:
     - ../vars/common-vars.yaml
+    - ../vms/worker-node/vars.yaml
   vars:
     ipcontent: "{{ dns_content | mandatory('dns_content is required. Pass it with -e dns_content=1.2.3.4') }}"
 

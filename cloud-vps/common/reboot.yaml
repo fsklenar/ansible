@@ -1,4 +1,4 @@
-- hosts: cloud-vps-haproxy
+- hosts: "{{ target_hosts | default('cloud-vps-haproxy') }}"
   become: true
 
   tasks:

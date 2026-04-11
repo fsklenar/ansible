@@ -1,0 +1,96 @@
+- hosts: cloud-vps-haproxy
+  become: true
+  vars_files:
+    - ../../vars/common-vars.yaml
+
+  tasks:
+
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: full
+
+    - name: Install HAProxy
+      apt:
+        name: haproxy
+        state: latest
+        update_cache: true
+
+    - name: Copy haproxy.cfg to server
+      copy:
+        src: ../../vars/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
+        owner: root
+        group: root
+        mode: '0644'
+
+
+    - name: Ensure certs directory exists
+      ansible.builtin.file:
+        path: "{{ ssl_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Write provided SSL certificate to file
+      ansible.builtin.copy:
+        content: "{{ sslcert | b64decode}}"
+        dest: "{{ ssl_cert }}"
+      when: sslcert is defined and sslcert | length > 0
+
+    - name: Write provided SSL key to file
+      ansible.builtin.copy:
+        content: "{{ sslkey | b64decode}}"
+        dest: "{{ ssl_key }}"
+      when: sslkey is defined and sslkey | length > 0
+
+
+    - name: Generate self-signed SSL certificate, if SSL cert was not provided
+      ansible.builtin.command:
+        cmd: >
+          openssl req -x509
+          -newkey rsa:4096
+          -keyout {{ ssl_key }}
+          -out {{ ssl_cert }}
+          -days {{ ssl_days }}
+          -nodes
+          -subj "/CN={{ ssl_cn }}"
+      when: sslcert is not defined or sslcert | length == 0
+
+    - name: Set permissions on key and cert
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ ssl_key }}"
+        - "{{ ssl_cert }}"
+
+    - name: Combine cert and key into HAProxy PEM bundle
+      ansible.builtin.shell:
+        cmd: "cat {{ ssl_cert }} {{ ssl_key }} > {{ ssl_combined }}"
+
+    - name: Set permissions on combined PEM
+      ansible.builtin.file:
+        path: "{{ ssl_combined }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Copy WG public key into index.html - make it publicly visible from Internet (for my purpose)
+      ansible.builtin.copy:
+        src: /etc/wireguard/server_public.key
+        dest: /etc/haproxy/index.html
+        owner: root
+        group: haproxy
+        mode: '0644'
+        remote_src: true
+
+    - name: Enable and start HAProxy service
+      ansible.builtin.systemd_service:
+        name: "haproxy.service"
+        enabled: true
+        state: reloaded
+        daemon_reload: true
+

@@ -1,5 +1,5 @@
 ---
-- hosts: cloud-vps
+- hosts: "{{ target_hosts | default('cloud-vps') }}"
   become: true
   vars_files:
     - ../vars/common-vars.yaml

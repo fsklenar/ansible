@@ -18,8 +18,8 @@ ssl_days: 365
 cloudflare_api_token: "{{ cf_api_token | b64decode }} "
 zone_name: "linuxadmin.eu"
 zone_id: "231e069319e31f0737be52ce6c0bf5a8"        # ← Cloudflare dashboard → your domain → Overview → Zone ID
-dns_record:
-  name: "proxy.linuxadmin.eu"
-  type: "A"                    # A, CNAME, MX, TXT, etc.
-  proxied: false               # true to enable Cloudflare proxy
-  ttl: 60
+# dns_record:
+#   name: "proxy.linuxadmin.eu"
+#   type: "A"                    # A, CNAME, MX, TXT, etc.
+#   proxied: false               # true to enable Cloudflare proxy
+#   ttl: 60
