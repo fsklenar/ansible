@@ -6,13 +6,24 @@ kubeadm init --control-plane-endpoint 192.168.0.202 --apiserver-advertise-addres
 
 ## Overlay network provider - Flannel or Calico
 
-### - Flannel installation
+### Flannel installation
 ```
 kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 ```
 
-### - Cilium installation
+### Cilium installation
 https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/
+
+```
+#Example
+helm upgrade -i cilium cilium/cilium   --version 1.19.2   --namespace kube-system   -f cilium.yaml
+```
+
+```
+#Cilium uninstall - TBD
+helm uninstall cilium cilium/cilium   --namespace kube-system
+
+```
 
 
 ### Allow pods on control-plane (optional - not recommended)
@@ -32,7 +43,56 @@ kubeadm join 192.168.0.202:6443 --token <token> \
 ```
 ansible-playbook k8s-vms/02-vm-kube-config.yaml
 ```
-### Continue with tool installation on K8S cluster
 
-- follow instructions in https://github.com/fsklenar/k8s-salaserver/blob/main/README.md
+### CoreDNS
+
+```
+  wget https://raw.githubusercontent.com/coredns/deployment/refs/heads/master/kubernetes/deploy.sh
+  
+  chmod u+x deploy.sh
+
+  ./deploy.sh | kubectl apply -f -
+  kubectl delete --namespace=kube-system deployment kube-dns
+```
+
+### - Fix Kubeproxy alert
+
+
+The metrics bind address of kube-proxy is default to `127.0.0.1:10249` that prometheus instances cannot access to. You should expose metrics by changing `metricsBindAddress` field value to `0.0.0.0:10249` if you want to collect them.
+
+Depending on the cluster, the relevant part `config.conf` will be in ConfigMap kube-system/kube-proxy or kube-system/kube-proxy-config. For example:
+
+```
+kubectl -n kube-system edit cm kube-proxy
+```
+```
+apiVersion: v1
+data:
+  config.conf: |-
+    apiVersion: kubeproxy.config.k8s.io/v1alpha1
+    kind: KubeProxyConfiguration
+    # ...
+    # metricsBindAddress: 127.0.0.1:10249
+    metricsBindAddress: 0.0.0.0:10249
+    # ...
+  kubeconfig.conf: |-
+    # ...
+kind: ConfigMap
+metadata:
+  labels:
+    app: kube-proxy
+  name: kube-proxy
+  namespace: kube-system
+```
+
+### - Similarly fix **Kube scheduler**, **Kube controller** and **etcd** alerts
+- SSH login into control-plane node
+```
+cd /etc/kubernetes/manifests
+```
+- change ``` - --bind-address=127.0.0.1``` in `kube-scheduler.yaml` file to ``` - --bind-address=0.0.0.0```
+- change ``` - --bind-address=127.0.0.1``` in `kube-controller-manager.yaml` file to ``` - --bind-address=0.0.0.0```
+- change ``` - --listen-metrics-urls=http://127.0.0.1:2381``` in `etcd.yaml` file to ``` - --listen-metrics-urls=http://0.0.0.0:2381```
+
+
 
