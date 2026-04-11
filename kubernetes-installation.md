@@ -55,7 +55,7 @@ ansible-playbook k8s-vms/02-vm-kube-config.yaml
   kubectl delete --namespace=kube-system deployment kube-dns
 ```
 
-### - Fix Kubeproxy alert
+### Fix Kubeproxy alert
 
 
 The metrics bind address of kube-proxy is default to `127.0.0.1:10249` that prometheus instances cannot access to. You should expose metrics by changing `metricsBindAddress` field value to `0.0.0.0:10249` if you want to collect them.
@@ -85,7 +85,7 @@ metadata:
   namespace: kube-system
 ```
 
-### - Similarly fix **Kube scheduler**, **Kube controller** and **etcd** alerts
+### Similarly fix **Kube scheduler**, **Kube controller** and **etcd** alerts
 - SSH login into control-plane node
 ```
 cd /etc/kubernetes/manifests
