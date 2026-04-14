@@ -13,7 +13,8 @@ cni_plugin_sha256: '{{ cni_plugin_url }}/cni-plugins-linux-amd64-{{ cni_plugin_v
 cni_plugin_target: '/opt/cni/bin'
 
 controlplane_ip: 192.168.0.202
-controlplane_hostname: k8smaster 
+controlplane_hostname: k8smaster
+cloud_hostname: cloud
 haproxy_server: "proxy.linuxadmin.eu"
 
 worker01_ip: 192.168.0.211

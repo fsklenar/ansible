@@ -1,0 +1,180 @@
+---
+# tailscale_setup.yml
+# Usage: ansible-playbook tailscale_setup.yml -e "tailscale_client_id=<id> tailscale_client_secret=<secret>"
+# Or set env vars: TAILSCALE_CLIENT_ID and TAILSCALE_CLIENT_SECRET
+
+- name: Install and configure Tailscale
+  hosts: "{{ target_hosts | default('localhost') }}"
+  become: true
+
+  vars:
+    tailscale_client_id: "{{ lookup('env', 'TAILSCALE_CLIENT_ID') }}"
+    tailscale_client_secret: "{{ lookup('env', 'TAILSCALE_CLIENT_SECRET') }}"
+    tailscale_tailnet: "-"          # "-" resolves to the default tailnet
+    tailscale_accept_dns: true
+    tailscale_preauthorized: true
+    tailscale_ephemeral: false
+
+  tasks:
+
+    # ─── 1. Install Tailscale ────────────────────────────────────────────────
+
+    - name: Add Tailscale signing key (Debian/Ubuntu)
+      ansible.builtin.apt_key:
+        url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] | lower }}.gpg"
+        state: present
+      when: ansible_facts["os_family"] == "Debian"
+
+    - name: Add Tailscale apt repository (Debian/Ubuntu)
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}
+          {{ ansible_facts['distribution_release'] }} main
+        filename: tailscale
+        state: present
+      when: ansible_facts["os_family"]== "Debian"
+
+    - name: Add Tailscale yum/dnf repository (RHEL/CentOS/Fedora)
+      ansible.builtin.yum_repository:
+        name: tailscale-stable
+        description: Tailscale stable
+        baseurl: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/$basearch"
+        gpgkey: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/repo.gpg"
+        gpgcheck: true
+        state: present
+      when: ansible_facts["os_family"] == "RedHat"
+
+    - name: Install Tailscale package
+      ansible.builtin.package:
+        name: tailscale
+        state: present
+        update_cache: true
+    #
+    # - name: Enable and start tailscaled service
+    #   ansible.builtin.systemd:
+    #     name: tailscaled
+    #     state: started
+    #     enabled: true
+    #     daemon_reload: true
+
+    # # ─── 2. Authenticate via OAuth client credentials ────────────────────────
+    #
+    # - name: Exchange client credentials for OAuth access token
+    #   ansible.builtin.uri:
+    #     url: "https://api.tailscale.com/api/v2/oauth/token"
+    #     method: POST
+    #     body_format: form-urlencoded
+    #     body:
+    #       client_id: "{{ tailscale_client_id }}"
+    #       client_secret: "{{ tailscale_client_secret }}"
+    #       grant_type: "client_credentials"
+    #     status_code: 200
+    #     return_content: true
+    #   register: ts_oauth_response
+    #   no_log: true
+    #
+    # - name: Create a one-time Tailscale auth key
+    #   ansible.builtin.uri:
+    #     url: "https://api.tailscale.com/api/v2/tailnet/{{ tailscale_tailnet }}/keys"
+    #     method: POST
+    #     headers:
+    #       Authorization: "Bearer {{ ts_oauth_response.json.access_token }}"
+    #       Content-Type: "application/json"
+    #     body_format: json
+    #     body:
+    #       capabilities:
+    #         devices:
+    #           create:
+    #             reusable: false
+    #             ephemeral: "{{ tailscale_ephemeral }}"
+    #             preauthorized: "{{ tailscale_preauthorized }}"
+    #             tags: []
+    #     status_code: 200
+    #     return_content: true
+    #   register: ts_key_response
+    #   no_log: true
+
+    # ─── 3. Bring Tailscale up ────────────────────────────────────────────────
+
+    - name: Check current Tailscale status
+      ansible.builtin.command: tailscale status --json
+      register: ts_status_pre
+      changed_when: false
+      failed_when: false
+
+    - name: Set fact – already connected
+      ansible.builtin.set_fact:
+        ts_already_up: >-
+          {{ (ts_status_pre.stdout | from_json).BackendState | default('') == 'Running' }}
+
+    # - name: Connect to Tailscale network
+    #   ansible.builtin.command: >
+    #     tailscale up
+    #       --auth-key={{ ts_key_response.json.key }}
+    #       --accept-dns={{ tailscale_accept_dns | lower }}
+    #       --reset
+    #   when: not ts_already_up
+    #   register: ts_up_result
+    #   changed_when: ts_up_result.rc == 0
+    #   no_log: true
+
+    - name: Connect to Tailscale network
+      ansible.builtin.command: >
+        tailscale up
+          --client-id="{{ tailscale_client_id }}"
+          --client-secret="{{ tailscale_client_secret }}"
+          --advertise-tags=tag:k8s-node
+      when: not ts_already_up
+      register: ts_up_result
+      changed_when: ts_up_result.rc == 0
+      no_log: true
+
+
+    # ─── 4. Retrieve Tailscale DNS information ────────────────────────────────
+
+    - name: Pause briefly for Tailscale to fully initialize
+      ansible.builtin.pause:
+        seconds: 5
+      when: not ts_already_up
+
+    - name: Fetch Tailscale DNS nameservers and search domains
+      ansible.builtin.command: tailscale dns status
+      register: ts_dns_status
+      changed_when: false
+
+    - name: Fetch full Tailscale status (JSON)
+      ansible.builtin.command: tailscale status --json
+      register: ts_status_json
+      changed_when: false
+
+    - name: Parse Tailscale node DNS facts
+      ansible.builtin.set_fact:
+        ts_dns_name: "{{ (ts_status_json.stdout | from_json).Self.DNSName | default('n/a') }}"
+        ts_ipv4: "{{ (ts_status_json.stdout | from_json).Self.TailscaleIPs | default([]) | select('match', '^100\\.') | first | default('n/a') }}"
+        ts_ipv6: "{{ (ts_status_json.stdout | from_json).Self.TailscaleIPs | default([]) | reject('match', '^100\\.') | first | default('n/a') }}"
+        ts_tailnet_name: "{{ (ts_status_json.stdout | from_json).MagicDNSSuffix | default('n/a') }}"
+
+    - name: Display Tailscale DNS results
+      ansible.builtin.debug:
+        msg:
+          - "==============================="
+          - " Tailscale node info"
+          - "==============================="
+          - "DNS name   : {{ ts_dns_name }}"
+          - "Tailnet    : {{ ts_tailnet_name }}"
+          - "IPv4       : {{ ts_ipv4 }}"
+          - "IPv6       : {{ ts_ipv6 }}"
+          - "-------------------------------"
+          - "DNS status output:"
+          - "{{ ts_dns_status.stdout }}"
+
+    # - name: Persist Tailscale DNS facts as host vars (optional)
+    #   ansible.builtin.copy:
+    #     dest: "/etc/ansible/facts.d/tailscale.fact"
+    #     mode: "0600"
+    #     content: |
+    #       [tailscale]
+    #       dns_name={{ ts_dns_name }}
+    #       tailnet={{ ts_tailnet_name }}
+    #       ipv4={{ ts_ipv4 }}
+    #       ipv6={{ ts_ipv6 }}
