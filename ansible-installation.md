@@ -38,6 +38,7 @@ k8sworker03 ansible_host=192.168.0.213
 
 ### d) for the first time execute `01-initial-setup.yaml` playbook under default installed sudoer user using password authentication
 ```
+ansible-galaxy collection install community.crypto
 ansible-playbook 01-initial-setup.yaml --ask-become-pass -u <adminuser>
 ```
 

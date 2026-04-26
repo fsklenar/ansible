@@ -74,6 +74,13 @@
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
 
+    - name: Set authorized key for ansible user
+      ansible.posix.authorized_key:
+        user: "{{ ansible_username }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa_node.pub') }}"
+
+
     - name: Disable password authentication for root
       ansible.builtin.lineinfile:
         path: /etc/ssh/sshd_config
