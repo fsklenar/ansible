@@ -63,23 +63,44 @@
         group: "{{ ansible_user }}"
         mode: '0640'
 
-    - name: "Optional: Automatically 're-learn' the new key (Non-interactive)"
+    - name: "Optional: Automatically 're-learn' the new key for ansible (Non-interactive)"
       # This prevents the "Are you sure you want to connect?" prompt later
       ansible.builtin.shell: "ssh-keyscan -H k8smaster >> /home/ansible/.ssh/known_hosts"
       register: keyscan_result
       changed_when: "keyscan_result.rc == 0"
 
-    #sshfs - mount folder from control-plane
+    - name: "Optional: Automatically 're-learn' the new key for root (Non-interactive)"
+      # This prevents the "Are you sure you want to connect?" prompt later
+      ansible.builtin.shell: "ssh-keyscan -H k8smaster >> /root/.ssh/known_hosts"
+      register: keyscan_result
+      changed_when: "keyscan_result.rc == 0"
+
+    # #sshfs - mount folder from control-plane
+    # - name: Mount remote filesystem via SSHFS
+    #   ansible.builtin.command:
+    #     cmd: >
+    #       sshfs ansible@k8smaster:/srv/virtiofs /srv/virtiofs
+    #       -o IdentityFile=/home/ansible/.ssh/id_rsa_node
+    #       -o allow_other
+    #       -o reconnect
+    #       -o ServerAliveInterval=15
+    #   args:
+    #     creates: /srv/virtiofs/sshfs  # skip if already mounted
+
+    - name: Set /etc/fuse.conf -
+      ansible.builtin.lineinfile:
+        path: /etc/fuse.conf
+        state: present
+        regexp: '^user_allow_other'
+        line: 'user_allow_other'
+
     - name: Mount remote filesystem via SSHFS
-      ansible.builtin.command:
-        cmd: >
-          sshfs ansible@k8smaster:/srv/virtiofs /srv/virtiofs
-          -o IdentityFile=/home/ansible/.ssh/id_rsa_node
-          -o allow_other
-          -o reconnect
-          -o ServerAliveInterval=15
-      args:
-        creates: /srv/virtiofs/sshfs  # skip if already mounted
+      ansible.posix.mount:
+        path: /srv/virtiofs
+        src: ansible@k8smaster:/srv/virtiofs
+        fstype: fuse.sshfs
+        opts: "_netdev,x-systemd.automount,x-systemd.idle-timeout=60,IdentityFile=/home/ansible/.ssh/id_rsa_node,allow_other,reconnect,ServerAliveInterval=15"
+        state: mounted
 
     #connect to control-plane - add node
 
