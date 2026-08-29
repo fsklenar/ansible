@@ -1,0 +1,5 @@
+dns_record:
+  name: "worker-node.linuxadmin.eu"
+  type: "A"                    # A, CNAME, MX, TXT, etc.
+  proxied: false               # true to enable Cloudflare proxy
+  ttl: 60
