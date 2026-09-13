@@ -4,6 +4,9 @@
   vars_files:
     - ../vars/common_vars.yaml
 
+  vars:
+    cloudflare_tunnel_token: "{{ lookup('env', 'CLOUDFLARE_TUNNEL_TOKEN') }}"
+
   tasks:
 
     - block:
@@ -24,20 +27,79 @@
             owner: "{{ server_username }}"
             group: "root"
 
-        - name: Copy do-port-forward.sh script
-          copy:
-            src: scripts/do-port-forward.sh
-            dest: /srv/data
-            mode: '0740'
-            group: "{{ server_username }}"
-            owner: root
+        # - name: Copy do-port-forward.sh script
+        #   copy:
+        #     src: scripts/do-port-forward.sh
+        #     dest: /srv/data
+        #     mode: '0740'
+        #     group: "{{ server_username }}"
+        #     owner: root
+        #
+        # - name: Crontab - port-forward to public server every 5 minutes
+        #   ansible.builtin.cron:
+        #       name: "port forward"
+        #       minute: "*/5"
+        #       hour: "*"
+        #       job: "/srv/data/do-port-forward.sh"
 
-        - name: Crontab - port-forward to public server every 5 minutes
-          ansible.builtin.cron:
-              name: "port forward"
-              minute: "*/5"
-              hour: "*"
-              job: "/srv/data/do-port-forward.sh"
+        # add CloudFlareD installation
+        - name: Ensure keyrings directory exists
+          ansible.builtin.file:
+            path: /usr/share/keyrings
+            state: directory
+            mode: '0755'
+            owner: root
+            group: root
+
+        - name: Download and install Cloudflare GPG key
+          ansible.builtin.get_url:
+            url: https://pkg.cloudflare.com/cloudflare-main.gpg
+            dest: /usr/share/keyrings/cloudflare-main.gpg
+            mode: '0644'
+            owner: root
+            group: root
+
+        - name: Add cloudflared apt repository
+          ansible.builtin.apt_repository:
+            repo: "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared any main"
+            filename: cloudflared
+            state: present
+          register: cloudflared_repo
+
+        - name: Update apt cache if repo was added/changed
+          ansible.builtin.apt:
+            update_cache: true
+          when: cloudflared_repo.changed
+
+        - name: Install cloudflared
+          ansible.builtin.apt:
+            name: cloudflared
+            state: present
+
+        # - name: Check if cloudflared systemd service already exists
+        #   ansible.builtin.stat:
+        #     path: /etc/systemd/system/cloudflared.service
+        #   register: cloudflared_service_file
+
+        - name: Uninstall existing cloudflared service (if present)
+          ansible.builtin.command:
+            cmd: "cloudflared service uninstall"
+          become: true
+          failed_when: false  # equivalent to "|| true"
+
+        - name: Install cloudflared service with token
+          ansible.builtin.command:
+            cmd: "cloudflared service install {{ cloudflare_tunnel_token }}"
+          become: true
+
+#         - name: Install cloudflared service with token
+#           ansible.builtin.shell:
+# #            cmd: "cloudflared service install {{ cloudflare_tunnel_token }}"
+#             cmd: "cloudflared service uninstall || true; cloudflared service install {{ cloudflare_tunnel_token }}"
+#           become: true
+          # no_log: true
+          # when: not cloudflared_service_file.stat.exists
+
 
         # avoid: "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
         - name: Remove the old fingerprint of the external server from this machine

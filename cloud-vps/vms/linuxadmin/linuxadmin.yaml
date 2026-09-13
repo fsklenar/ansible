@@ -1,0 +1,11 @@
+- hosts: cloud-vps-haproxy
+  become: true
+  vars_files:
+    - ../../vars/common-vars.yaml
+
+  tasks:
+
+    - name: Update all packages to the latest version
+      apt:
+        upgrade: full
+
