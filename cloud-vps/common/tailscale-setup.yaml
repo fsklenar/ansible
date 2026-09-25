@@ -19,36 +19,52 @@
 
     # ─── 1. Install Tailscale ────────────────────────────────────────────────
 
-    - name: Add Tailscale signing key (Debian/Ubuntu)
-      ansible.builtin.apt_key:
-        url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] | lower }}.gpg"
-        state: present
-      when: ansible_facts["os_family"] == "Debian"
+    - name: Download Tailscale install script
+      ansible.builtin.get_url:
+        url: https://tailscale.com/install.sh
+        dest: /tmp/tailscale_install.sh
+        mode: '0755'
 
-    - name: Add Tailscale apt repository (Debian/Ubuntu)
-      ansible.builtin.apt_repository:
-        repo: >-
-          deb https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}
-          {{ ansible_facts['distribution_release'] }} main
-        filename: tailscale
-        state: present
-      when: ansible_facts["os_family"]== "Debian"
+    - name: Run Tailscale install script
+      ansible.builtin.command: /tmp/tailscale_install.sh
+      register: tailscale_install
+      changed_when: "'Tailscale is already up to date' not in tailscale_install.stdout"
 
-    - name: Add Tailscale yum/dnf repository (RHEL/CentOS/Fedora)
-      ansible.builtin.yum_repository:
-        name: tailscale-stable
-        description: Tailscale stable
-        baseurl: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/$basearch"
-        gpgkey: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/repo.gpg"
-        gpgcheck: true
-        state: present
-      when: ansible_facts["os_family"] == "RedHat"
+    - name: Remove temporary installation script
+      ansible.builtin.file:
+        path: /tmp/tailscale_install.sh
+        state: absent
 
-    - name: Install Tailscale package
-      ansible.builtin.package:
-        name: tailscale
-        state: present
-        update_cache: true
+    # - name: Add Tailscale signing key (Debian/Ubuntu)
+    #   ansible.builtin.apt_key:
+    #     url: "https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}/{{ ansible_facts['distribution_release'] | lower }}.gpg"
+    #     state: present
+    #   when: ansible_facts["os_family"] == "Debian"
+    #
+    # - name: Add Tailscale apt repository (Debian/Ubuntu)
+    #   ansible.builtin.apt_repository:
+    #     repo: >-
+    #       deb https://pkgs.tailscale.com/stable/{{ ansible_facts['distribution'] | lower }}
+    #       {{ ansible_facts['distribution_release'] }} main
+    #     filename: tailscale
+    #     state: present
+    #   when: ansible_facts["os_family"]== "Debian"
+
+    # - name: Add Tailscale yum/dnf repository (RHEL/CentOS/Fedora)
+    #   ansible.builtin.yum_repository:
+    #     name: tailscale-stable
+    #     description: Tailscale stable
+    #     baseurl: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/$basearch"
+    #     gpgkey: "https://pkgs.tailscale.com/stable/rhel/{{ ansible_facts['distribution_major_version'] }}/repo.gpg"
+    #     gpgcheck: true
+    #     state: present
+    #   when: ansible_facts["os_family"] == "RedHat"
+    #
+    # - name: Install Tailscale package
+    #   ansible.builtin.package:
+    #     name: tailscale
+    #     state: present
+    #     update_cache: true
     #
     # - name: Enable and start tailscaled service
     #   ansible.builtin.systemd:
@@ -120,7 +136,7 @@
 
     - name: Connect to Tailscale network
       ansible.builtin.command: >
-        tailscale up
+        sudo tailscale up
           --client-id="{{ tailscale_client_id }}"
           --client-secret="{{ tailscale_client_secret }}"
           --advertise-tags=tag:k8s-node
