@@ -1,4 +1,4 @@
-- hosts: cloud-vps-haproxy
+- hosts: cloud-vps
   become: true
   vars_files:
     - ../../vars/common-vars.yaml
@@ -8,4 +8,10 @@
     - name: Update all packages to the latest version
       apt:
         upgrade: full
+
+    - name: Install podman
+      apt:
+        name: podman
+        state: latest
+        update_cache: true
 
