@@ -4,6 +4,12 @@
   vars_files:
     - ../vars/common-vars.yaml
 
+  handlers:
+    - name: Reload sshd
+      ansible.builtin.service:
+        name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
+        state: reloaded
+
   tasks:
 
     - name: Update all packages to the latest version
@@ -108,6 +114,18 @@
         state: present
         regexp: '^ServerAliveCountMax 2'
         line: 'ServerAliveCountMax 2'
+
+    - name: Disable SSH password authentication
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/00-disable-password.conf
+        content: |
+          PasswordAuthentication no
+          KbdInteractiveAuthentication no
+        owner: root
+        group: root
+        mode: "0644"
+        validate: /usr/sbin/sshd -t -f %s
+      notify: Reload sshd
  
     - name: Update apt and install required system packages
       apt:
