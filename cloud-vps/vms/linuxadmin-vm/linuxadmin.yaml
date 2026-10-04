@@ -15,3 +15,8 @@
         state: latest
         update_cache: true
 
+    - name: Install wireguard
+      apt:
+        name: wireguard
+        state: latest
+        update_cache: true
