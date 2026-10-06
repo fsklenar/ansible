@@ -33,6 +33,8 @@
         append: true
         create_home: true
         shell: /bin/bash
+      when: inventory_hostname != 'cloud-linuxadmin'
+
 
     - name: Setup passwordless sudo for "{{ ansible_username }}"
       ansible.builtin.lineinfile:
@@ -49,6 +51,7 @@
         regexp: '^{{ server_username }}'
         line: '{{ server_username }} ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
+      when: inventory_hostname != 'cloud-linuxadmin'
 
     - name: Mitigations off
       ansible.builtin.lineinfile:
@@ -66,19 +69,20 @@
       ansible.posix.authorized_key:
         user: "{{ server_username }}"
         state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
+      when: inventory_hostname != 'cloud-linuxadmin'
 
     - name: Set authorized key for ansible user
       ansible.posix.authorized_key:
         user: "{{ ansible_username }}"
         state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-
-    - name: Set authorized key for ansible user
-      ansible.posix.authorized_key:
-        user: "{{ ansible_username }}"
-        state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa_node.pub') }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ed25519.pub') }}"
+    #
+    # - name: Set authorized key for ansible user
+    #   ansible.posix.authorized_key:
+    #     user: "{{ ansible_username }}"
+    #     state: present
+    #     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa_node.pub') }}"
 
 
     - name: Disable password authentication for root
@@ -116,12 +120,47 @@
         update_cache: true
       when: "'servers' in group_names"
 
-    # - name: UFW - Allow SSH connections
-    #   community.general.ufw:
-    #     rule: allow
-    #     name: OpenSSH
+    - name: CloudflaredD in salaserver
+      when: "'servers' in group_names"
+      block:
+        - name: Install prerequisites
+          ansible.builtin.apt:
+            name:
+              - ca-certificates
+              - curl
+              - gnupg
+            state: present
+            update_cache: true
 
-    # - name: UFW - Enable and deny by default
-    #   community.general.ufw:
-    #     state: enabled
-    #     default: deny
+        - name: Create directory for keyrings
+          ansible.builtin.file:
+            path: /etc/apt/keyrings
+            state: directory
+            mode: '0755'
+
+        - name: Download Cloudflare GPG keyring
+          ansible.builtin.get_url:
+            url: https://pkg.cloudflare.com/cloudflare-main.gpg
+            dest: /etc/apt/keyrings/cloudflare-main.gpg
+            mode: '0644'
+
+        - name: Add Cloudflare apt repository (Deb822 format)
+          ansible.builtin.deb822_repository:
+            name: cloudflared
+            types: deb
+            uris: https://pkg.cloudflare.com/cloudflared
+            suites: any
+            components: main
+            signed_by: /etc/apt/keyrings/cloudflare-main.gpg
+            state: present
+          register: cloudflared_repo
+
+        - name: Update apt cache if repository was added or changed
+          ansible.builtin.apt:
+            update_cache: true
+          when: cloudflared_repo.changed
+
+        - name: Install cloudflared package
+          ansible.builtin.apt:
+            name: cloudflared
+            state: present
