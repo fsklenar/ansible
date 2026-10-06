@@ -2,6 +2,9 @@
   become: true
   vars_files:
     - ../../vars/common-vars.yaml
+  vars:
+    swap_file_path: "/swapfile"
+    swap_file_size_mb: 2048
 
   tasks:
 
@@ -20,3 +23,67 @@
         name: wireguard
         state: latest
         update_cache: true
+
+    - name: Check if swap file already exists
+      ansible.builtin.stat:
+        path: "{{ swap_file_path }}"
+      register: swap_file_check
+
+    - name: Create swap file
+      ansible.builtin.command:
+        cmd: "fallocate -l {{ swap_file_size_mb }}M {{ swap_file_path }}"
+        creates: "{{ swap_file_path }}"
+      when: not swap_file_check.stat.exists
+
+    - name: Set correct permissions on swap file
+      ansible.builtin.file:
+        path: "{{ swap_file_path }}"
+        owner: root
+        group: root
+        mode: '0600'
+
+    - name: Format file as swap
+      ansible.builtin.command:
+        cmd: "mkswap {{ swap_file_path }}"
+      register: mkswap_result
+      when: not swap_file_check.stat.exists
+      changed_when: mkswap_result.rc == 0
+
+    - name: Enable swap file
+      ansible.builtin.command:
+        cmd: "swapon {{ swap_file_path }}"
+      register: swapon_result
+      when: not swap_file_check.stat.exists
+      changed_when: swapon_result.rc == 0
+
+    - name: Ensure swap entry exists in /etc/fstab
+      ansible.posix.mount:
+        path: none
+        src: "{{ swap_file_path }}"
+        fstype: swap
+        opts: sw
+        state: present
+
+    - name: Run Docker containers at boot
+      ansible.builtin.cron:
+        name: "Run Docker containers at boot"
+        special_time: reboot
+        job: "sleep 60 && /home/ubuntu/docker/runall.sh"
+        user: ubuntu
+
+    - name: Add custom IP address at reboot
+      ansible.builtin.cron:
+        name: "Add 10.1.0.5 IP address"
+        special_time: reboot
+        job: "/usr/sbin/ip addr add 10.1.0.5/32 dev eth0"
+        user: root
+
+    - name: Run backup every Sunday at midnight
+      ansible.builtin.cron:
+        name: "Weekly LA backup"
+        minute: "10"
+        hour: "0"
+        weekday: "0"
+        job: "/root/backup_la.sh"
+        user: root
+
