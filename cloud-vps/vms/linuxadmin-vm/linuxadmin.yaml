@@ -87,3 +87,9 @@
         job: "/root/backup_la.sh"
         user: root
 
+    - name: Enable user lingering for ubuntu
+      command: sudo loginctl enable-linger ubuntu
+      register: linger_result
+      #changed_when: "'Linger=yes' not in lookup('pipe', 'loginctl show-user ubuntu --property=Linger')"
+      become: true
+
