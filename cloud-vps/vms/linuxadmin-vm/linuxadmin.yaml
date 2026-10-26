@@ -87,18 +87,12 @@
         job: "/root/backup_la.sh"
         user: root
 
+    # - name: Check if lingering is enabled for ubuntu
+    #   stat:
+    #     path: /var/lib/systemd/linger/ubuntu
+    #   register: linger_status
+    #
     # - name: Enable user lingering for ubuntu
     #   command: sudo loginctl enable-linger ubuntu
-    #   register: linger_result
-    #   changed_when: "'Linger=yes' not in lookup('pipe', 'loginctl show-user ubuntu --property=Linger')"
-    #   become: true
-
-    - name: Check if lingering is enabled for ubuntu
-      stat:
-        path: /var/lib/systemd/linger/ubuntu
-      register: linger_status
-
-    - name: Enable user lingering for ubuntu
-      command: sudo loginctl enable-linger ubuntu
-      when: not linger_status.stat.exists
-
+    #   when: not linger_status.stat.exists
+    #

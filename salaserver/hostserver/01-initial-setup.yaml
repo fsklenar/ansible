@@ -106,6 +106,13 @@
         regexp: '^ServerAliveCountMax 2'
         line: 'ServerAliveCountMax 2'
 
+    - name: Disable password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: '^#?PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+
     - name: Update apt and install required system packages
       ansible.builtin.apt:
         pkg:
