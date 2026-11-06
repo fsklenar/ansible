@@ -5,6 +5,13 @@
   vars_files:
     - ../vars/common_vars.yaml
 
+  handlers:
+    - name: Reload sshd
+      ansible.builtin.service:
+        name: "{{ 'ssh' if ansible_os_family == 'Debian' else 'sshd' }}"
+        state: reloaded
+
+
   tasks:
     - name: Update all packages to the latest version
       ansible.builtin.apt:
