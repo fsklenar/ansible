@@ -87,6 +87,15 @@
         job: "/root/backup_la.sh"
         user: root
 
+    - name: Run backup every day
+      ansible.builtin.cron:
+        name: "Daily LA backup"
+        minute: "10"
+        hour: "0"
+        weekday: "1-6"
+        job: "/root/backup_daily_la.sh"
+        user: root
+
     # - name: Check if lingering is enabled for ubuntu
     #   stat:
     #     path: /var/lib/systemd/linger/ubuntu
